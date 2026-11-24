@@ -253,6 +253,7 @@
   },
   "elections": {
     "navPresidential": "Presidential 2026 · archive",
+    "navNowcast": "Next parliamentary election · daily estimate",
     "navParliamentary": "Parliamentary 2025 · archive",
     "navArchiveGuide": "All elections (archive)",
     "navMethodology": "Methodology"
@@ -290,6 +291,11 @@
     "economyTitleLive": "The economy, at the latest reading",
     "economyFinding": "Activity {pulse} year on year · recession risk {recession}",
     "economyAction": "See the reading and evidence",
+    "nowcastTitle": "Next parliamentary election",
+    "nowcastDate": "estimate of {date}, polls up to {poll}",
+    "nowcastFinding": "{party} would win more seats than any other party in {p} of simulations",
+    "nowcastNote": "No election has been called: this is the result the polls pointed to if the vote were held on the day of the latest.",
+    "nowcastOpen": "See the estimate",
     "electionsKicker": "Elections",
     "electionsText": "These are the forecasts as they were published before the vote, not the official results.",
     "electionsArchived": "Archive",

@@ -17,6 +17,7 @@ import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
 import { POPULATION_PUBLISHED, POPULATION_ROUTES } from '@/lib/config/population'
 import { regionSlug } from '@/lib/population/places'
 import { COPY_REVISED, newestDate, sitemapDay } from '@/lib/sitemap-dates'
+import { NOWCAST_DIR } from '@/lib/legislative-nowcast'
 
 export const dynamic = 'force-static'
 
@@ -39,6 +40,7 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/desporto/liga/dados': { changeFrequency: 'monthly', priority: 0.6 },
   '/desporto/liga/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
   '/desporto/liga/2025-26': { changeFrequency: 'yearly', priority: 0.6 },
+  '/eleicoes/proximas-legislativas': { changeFrequency: 'daily', priority: 0.9 },
   '/eleicoes/presidenciais': { changeFrequency: 'yearly', priority: 0.7 },
   '/eleicoes/legislativas': { changeFrequency: 'yearly', priority: 0.7 },
   '/eleicoes/legislativas/mapa': { changeFrequency: 'yearly', priority: 0.6 },
@@ -97,6 +99,16 @@ const day = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`)
 const validDay = (iso: unknown): Date | undefined =>
   typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}/.test(iso) ? day(iso) : undefined
 
+/** The day the live legislative nowcast was made (nowcast.json → run.as_of), or undefined. */
+function nowcastDate(): Date | undefined {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data', NOWCAST_DIR, 'nowcast.json'), 'utf8'))
+    return validDay(data?.run?.as_of)
+  } catch {
+    return undefined
+  }
+}
+
 /** A date field from one of the season's JSON files, or undefined. */
 function ligaFileDate(file: string, field: string): Date | undefined {
   try {
@@ -123,14 +135,15 @@ function contentDates({ liga, players }: { liga?: Date; players?: Date }): Recor
   const scorecard = ligaFileDate('market_scorecard.json', 'generated_at')
   const data: Record<string, Date | undefined> = {
     // The homepage shows the Liga forecast and the population release.
-    '/': newestDate(liga, population),
+    '/': newestDate(liga, population, nowcastDate()),
     '/desporto/liga': liga,
+    '/eleicoes/proximas-legislativas': nowcastDate(),
     '/desporto/liga/jogo-previsoes': newestDate(liga, fixtures),
     '/desporto/liga/dados': newestDate(liga, fixtures, injuries, scorecard),
     '/desporto/liga/jogadores': players,
     '/desporto/liga/modelo': scorecard,
-    // /sobre lists every section's status (the forecast, the release).
-    '/sobre': newestDate(liga, population),
+    // /sobre lists every section's status (the forecast, the release, the nowcast).
+    '/sobre': newestDate(liga, population, nowcastDate()),
     '/populacao': population,
     '/populacao/misteriosa': population,
     '/populacao/qualidade': population,

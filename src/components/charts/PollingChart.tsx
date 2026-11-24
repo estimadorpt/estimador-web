@@ -23,6 +23,11 @@ interface PollingChartProps {
   /** Long rows, for MDX pieces that pass inline data; reduced here to the same window. */
   data?: TrendData[];
   voteShareLabel?: string;
+  /**
+   * The band's coverage, as the notes print it: the archive's 94% HDI by
+   * default; the live nowcast passes its central 90% interval (`hdi: false`).
+   */
+  band?: { percent: number; hdi: boolean };
 }
 
 /** One party's value on one date, as Plot reads it. */
@@ -48,7 +53,7 @@ const day = (iso: string) => new Date(`${iso}T12:00:00Z`);
  * each other near the floor, so their lines go without, and the table holds
  * every party with its band.
  */
-export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp }: PollingChartProps) {
+export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true } }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("forecast");
   const voteShareLabel = voteShareLabelProp ?? t("voteShareLabel");
@@ -218,12 +223,12 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     <div className="w-full">
       <p className="mb-2 text-xs text-graphite">
         {pt
-          ? "Todos os partidos, cada um com o nome ao fim da sua linha. A faixa clara (94%) só nos três maiores: a dos outros sobrepor-se-ia junto ao fundo."
-          : "Every party, each named at the end of its line. The light band (94%) on the three largest only: the others' would overlap near the floor."}
+          ? `Todos os partidos, cada um com o nome ao fim da sua linha. A faixa clara (${band.percent}%) só nos três maiores: a dos outros sobrepor-se-ia junto ao fundo.`
+          : `Every party, each named at the end of its line. The light band (${band.percent}%) on the three largest only: the others' would overlap near the floor.`}
       </p>
       <div ref={containerRef} />
       <ChartTable
-        caption={`${voteShareLabel} · ${pt ? "estimativa e banda de 94% (HDI), todos os partidos" : "estimate and 94% HDI band, every party"}`}
+        caption={`${voteShareLabel} · ${pt ? `estimativa e banda de ${band.percent}%${band.hdi ? " (HDI)" : ""}, todos os partidos` : `estimate and ${band.percent}%${band.hdi ? " HDI" : ""} band, every party`}`}
         summaryLabel={pt ? "Ver como tabela, mais recente primeiro" : "View as table, latest first"}
         columns={table.columns}
         rows={table.rows}

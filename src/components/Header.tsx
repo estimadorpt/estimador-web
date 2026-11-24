@@ -66,6 +66,7 @@ export function Header() {
     elections: t('nav.elections'),
     electionsArchive: t('elections.navArchiveGuide'),
     electionsPresidential: t('elections.navPresidential'),
+    electionsNowcast: t('elections.navNowcast'),
     electionsParliamentary: t('elections.navParliamentary'),
     electionsMethodology: t('elections.navMethodology'),
     economics: t('nav.economics'),

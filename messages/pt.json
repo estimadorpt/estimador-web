@@ -253,6 +253,7 @@
   },
   "elections": {
     "navPresidential": "Presidenciais 2026 · arquivo",
+    "navNowcast": "Próximas legislativas · estimativa diária",
     "navParliamentary": "Legislativas 2025 · arquivo",
     "navArchiveGuide": "Todas as eleições (arquivo)",
     "navMethodology": "Metodologia"
@@ -290,6 +291,11 @@
     "economyTitleLive": "A economia, na última leitura",
     "economyFinding": "Atividade {pulse} homólogo · risco de recessão {recession}",
     "economyAction": "Ver a leitura e a evidência",
+    "nowcastTitle": "Próximas legislativas",
+    "nowcastDate": "estimativa de {date}, sondagens até {poll}",
+    "nowcastFinding": "{party} elegia mais deputados do que qualquer outro partido em {p} das simulações",
+    "nowcastNote": "Não há eleições marcadas: é o resultado que as sondagens davam se a votação fosse no dia da última.",
+    "nowcastOpen": "Ver a estimativa",
     "electionsKicker": "Eleições",
     "electionsText": "São as previsões tal como foram publicadas antes do voto, não os resultados oficiais.",
     "electionsArchived": "Arquivo",

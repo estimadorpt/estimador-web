@@ -112,7 +112,10 @@ describe('sitemap', () => {
     // is today on the day it goes live.
     const articleDays = new Set(SITE_LOCALES.flatMap(locale => getMDXArticlesByLocale(locale).map(article => article.updated ?? article.date)));
     const isArticlePage = (entryUrl: string) => /^https:\/\/estimador\.pt\/(pt|en)\/artigos\//.test(entryUrl);
-    const known = new Set([ligaDay, POPULATION_PUBLISHED, ...Object.values(COPY_REVISED), ...feeds.filter((d): d is string => !!d)]);
+    // The live legislative nowcast is dated by the day its run was made (nowcast.json → run.as_of).
+    const nowcastDay = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/elections/legislative-nowcast/nowcast.json'), 'utf8')).run.as_of as string;
+    expect(new Date(byUrl.get(url('pt', '/eleicoes/proximas-legislativas'))!.lastModified!).toISOString().slice(0, 10)).toBe(nowcastDay);
+    const known = new Set([ligaDay, POPULATION_PUBLISHED, nowcastDay, ...Object.values(COPY_REVISED), ...feeds.filter((d): d is string => !!d)]);
     const stamped = entries.filter(entry => entry.lastModified && new Date(entry.lastModified).toISOString().slice(0, 10) === today
       && !known.has(today) && !(isArticlePage(entry.url) && articleDays.has(today)));
     expect(stamped.map(entry => entry.url)).toEqual([]);

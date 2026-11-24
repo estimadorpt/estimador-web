@@ -64,12 +64,18 @@ describe('site navigation', () => {
     expect(LIGA_TABS.find(tab => tab.key === 'jogo')?.en).toBe(en.nav.game);
   });
 
+  it('opens the elections menu on the live nowcast, before the archive', () => {
+    const elections = nav('pt').find(item => item.id === 'elections');
+    expect(elections?.dropdown?.[0]).toEqual({ href: '/eleicoes/proximas-legislativas', label: pt.elections.navNowcast });
+  });
+
   it('lights the section a page belongs to, Liga 2 included', () => {
     const items = nav('pt');
     expect(active(items, '/desporto/liga2/')).toEqual(['sport']);
     expect(active(items, '/desporto/liga/benfica/')).toEqual(['sport']);
     expect(active(items, '/populacao/freguesia/010103/')).toEqual(['population']);
     expect(active(items, '/eleicoes/legislativas/mapa/')).toEqual(['elections']);
+    expect(active(items, '/eleicoes/proximas-legislativas/')).toEqual(['elections']);
     expect(active(nav('pt', false, true), '/economia/metodologia/')).toEqual(['economics']);
     expect(active(items, '/privacidade/')).toEqual(['about']);
     expect(active(items, '/')).toEqual(['home']);

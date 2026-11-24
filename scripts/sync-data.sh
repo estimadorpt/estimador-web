@@ -59,6 +59,7 @@ sync_elections() {
   echo "  (raw simulation draws read only at build time live in data/build-only/elections/)"
   echo "  Presidential: $(ls "$DATA_DIR/elections/presidential-2026/" 2>/dev/null | wc -l | tr -d ' ') files"
   echo "  Parliamentary: $(ls "$DATA_DIR/elections/parliamentary-2025/" 2>/dev/null | wc -l | tr -d ' ') files"
+  echo "  Live nowcast: written by the Mac job (estimador-elections scripts/nowcast_daily.sh), never synced by hand"
 }
 
 sync_economics() {
