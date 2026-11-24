@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-23",
+ "as_of": "2026-11-24",
  "years": [
   2015,
   2019,
@@ -288,36 +288,40 @@
   "2022-2024": {
    "central": 353,
    "lo": 254,
-   "hi": 353
+   "hi": 380
   },
   "2024-2025": {
    "central": 190,
    "lo": 151,
-   "hi": 195
+   "hi": 245
   }
  },
  "split_to_ch_thousands": {
   "2022-2024": {
    "PS": {
-    "lo": 160,
-    "hi": 230,
+    "mid": 165,
+    "lo": 130,
+    "hi": 205,
     "ei": 225
    },
    "PSD_CDS": {
-    "lo": 155,
-    "hi": 180,
+    "mid": 180,
+    "lo": 140,
+    "hi": 215,
     "ei": 70
    }
   },
   "2024-2025": {
    "PS": {
-    "lo": 65,
-    "hi": 95,
+    "mid": 110,
+    "lo": 75,
+    "hi": 145,
     "ei": 160
    },
    "PSD_CDS": {
-    "lo": 95,
-    "hi": 100,
+    "mid": 110,
+    "lo": 85,
+    "hi": 160,
     "ei": 25
    }
   }
@@ -444,7 +448,9 @@
      "jp_eep_res": 10.9,
      "erc_polls_raked": 11.0,
      "ei_entropy_region": 4.4,
-     "ei_entropy_national": 2.3
+     "ei_entropy_national": 2.3,
+     "joint_sel": 10.9,
+     "joint_con": 10.4
     }
    },
    {
@@ -457,7 +463,9 @@
      "jp_eep_res": 7.5,
      "erc_polls_raked": 7.9,
      "ei_entropy_region": 10.4,
-     "ei_entropy_national": 10.0
+     "ei_entropy_national": 10.0,
+     "joint_sel": 6.8,
+     "joint_con": 7.4
     }
    },
    {
@@ -547,7 +555,9 @@
      "eep2025_chart": 5.8,
      "erc_polls_raked": 5.5,
      "ei_entropy_region": 1.4,
-     "ei_entropy_national": 0.0
+     "ei_entropy_national": 0.0,
+     "joint_sel": 5.6,
+     "joint_con": 7.6
     }
    },
    {
@@ -561,7 +571,9 @@
      "eep2025_chart": 5.6,
      "erc_polls_raked": 3.8,
      "ei_entropy_region": 9.4,
-     "ei_entropy_national": 8.9
+     "ei_entropy_national": 8.9,
+     "joint_sel": 6.3,
+     "joint_con": 6.8
     }
    },
    {
