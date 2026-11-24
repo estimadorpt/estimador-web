@@ -28,6 +28,8 @@ interface PollingChartProps {
    * default; the live nowcast passes its central 90% interval (`hdi: false`).
    */
   band?: { percent: number; hdi: boolean };
+  /** The line above the chart on which parties carry a band; a page that says it elsewhere can drop it. */
+  showNote?: boolean;
 }
 
 /** One party's value on one date, as Plot reads it. */
@@ -53,7 +55,7 @@ const day = (iso: string) => new Date(`${iso}T12:00:00Z`);
  * each other near the floor, so their lines go without, and the table holds
  * every party with its band.
  */
-export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true } }: PollingChartProps) {
+export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true }, showNote = true }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("forecast");
   const voteShareLabel = voteShareLabelProp ?? t("voteShareLabel");
@@ -221,11 +223,11 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
 
   return (
     <div className="w-full">
-      <p className="mb-2 text-xs text-graphite">
+      {showNote && <p className="mb-2 text-xs text-graphite">
         {pt
           ? `Todos os partidos, cada um com o nome ao fim da sua linha. A faixa clara (${band.percent}%) só nos três maiores: a dos outros sobrepor-se-ia junto ao fundo.`
           : `Every party, each named at the end of its line. The light band (${band.percent}%) on the three largest only: the others' would overlap near the floor.`}
-      </p>
+      </p>}
       <div ref={containerRef} />
       <ChartTable
         caption={`${voteShareLabel} · ${pt ? `estimativa e banda de ${band.percent}%${band.hdi ? " (HDI)" : ""}, todos os partidos` : `estimate and ${band.percent}%${band.hdi ? " HDI" : ""} band, every party`}`}
