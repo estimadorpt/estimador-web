@@ -1,5 +1,6 @@
 import { MDXArticleMetadata } from "@/lib/mdx-articles";
 import { localizedUrl } from "@/lib/metadata";
+import { articleAuthor } from "@/lib/structured-data";
 
 const PUBLISHER = {
   "@type": "Organization",
@@ -32,11 +33,7 @@ export function ArticleStructuredData({ article, locale }: ArticleStructuredData
     "@type": "Article",
     headline: article.title,
     description: article.excerpt,
-    author: {
-      "@type": "Person",
-      name: article.author,
-      url: "https://estimador.pt",
-    },
+    author: articleAuthor(article.author),
     publisher: PUBLISHER,
     datePublished: article.date,
     // A revised piece that still reports its publication date as the last
@@ -79,7 +76,7 @@ export function ArticleListStructuredData({ articles, locale }: ArticleListStruc
       "@type": "BlogPosting",
       headline: article.title,
       description: article.excerpt,
-      author: { "@type": "Person", name: article.author },
+      author: articleAuthor(article.author),
       datePublished: article.date,
       inLanguage: language(locale),
       url: localizedUrl(locale, `/artigos/${article.slug}`),

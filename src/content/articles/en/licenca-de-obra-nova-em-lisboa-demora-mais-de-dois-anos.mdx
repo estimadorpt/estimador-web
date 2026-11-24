@@ -1,0 +1,44 @@
+export const metadata = {
+  "title": "A new-build licence in Lisbon takes more than two years",
+  "excerpt": "Half of the 727 new-build licences Lisbon issued since 2009 took more than 854 days from application to alvará; in 2025 the median was 1,242 days.",
+  "author": "estimador.pt",
+  "date": "2026-11-24",
+  "kind": "nota",
+  "draft": true,
+  "tags": [
+    "Housing",
+    "Lisbon",
+    "Licensing"
+  ],
+  "slug": "licenca-de-obra-nova-em-lisboa-demora-mais-de-dois-anos"
+};
+
+<Callout kind="context" label="Context">
+  Written with the processes Lisbon’s Câmara had published up to 29 October 2026 and INE’s counts as retrieved on 4 November 2026.
+</Callout>
+
+Half of the 727 licences to build from scratch that Lisbon’s Câmara (the city council) issued between 2009 and October 2026 took more than 854 days, about two years and four months, from the application to the alvará (the licence document); a quarter took more than 1,330 days. Every year since 2019 the median has been above two years, and in 2025 it was 1,242 days, over 34 alvarás.
+
+These times count only licences that reached an alvará. Applications still pending, refused or withdrawn are not in the medians.
+
+## How we measured it
+
+Lisbon’s Câmara publishes, as open data, every building process under the planning and building code (RJUE) since 2009, with the date it entered and the date of its alvará ([dados.gov.pt](https://dados.gov.pt/datasets/processos-de-obras-de-edificacao-e-demolicao-abrangidas-pelo-rjue-desde-2009), CC0 licence). For each licence process that received an alvará we counted the days between the two dates, and grouped the processes by the year of the alvará. “New build” is the new-construction operation; alterations and extensions, most of Lisbon’s licences, are counted separately.
+
+{/* TODO: <LisbonLicenceTimes locale="en" headingLevel={3} /> once the component reaches main (branch claude/project-thread-3bq6zt) and is added to ARTICLE_CHARTS. */}
+
+Three things to keep in mind:
+
+- **The alvará is not the decision.** The Câmara issues it after approving the project and after the applicant asks for it and pays the fees, so these days include the applicant’s own time. The Câmara publishes no decision date.
+- **There are few alvarás a year.** The Câmara issued between 15 and 66 new-build alvarás a year, so a single year’s median moves a lot.
+- **In 2024 the document changed.** Since 4 March 2024, under the planning Simplex (Decree-Law 10/2024), the building licence alvará no longer exists and the receipt for the fees stands in its place. We do not yet know whether the date Lisbon publishes after that is the receipt’s; read 2024 to 2026 with that in mind.
+
+Since 9 November 2026 the property platform flatin.pt has published the same measure from the same data, for titles of the last 12 months: a median of 940 days over 35 new-build titles issued up to 29 October 2026 ([flatin.pt](https://flatin.pt/pt/barometro-construcao/)). Our figures pool every year since 2009.
+
+## Licences outrun completed homes
+
+In 2025, Portugal licensed 42,066 dwellings in new buildings for family housing and completed 27,301 ([INE, licensed](https://www.ine.pt/xurl/ind/0008309); [INE, completed](https://www.ine.pt/xurl/ind/0013249); completions for 2024 and 2025 are INE estimates). The dwellings completed in 2025 come to 81 for every 100 licensed in 2023, which were 33,560. That is a ratio between counts from different years, not what became of the same homes: INE does not publish which licences ended in a completed building.
+
+<Callout kind="caveat" label="What this note does not show">
+  It does not say whether licensing is what holds back homebuilding in Lisbon: the times cover only licences that were issued, and the ratio of licensed to completed dwellings does not follow the same buildings. Nor does it compare Lisbon with other câmaras: only Lisbon publishes both dates for each process.
+</Callout>
