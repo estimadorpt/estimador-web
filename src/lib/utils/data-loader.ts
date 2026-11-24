@@ -164,8 +164,8 @@ export const NOWCAST_SEAT_SUMS: ReadonlyArray<readonly string[]> = [
 /**
  * The live legislative nowcast, summarised on the server like the archive:
  * the page gets the file's shares, trend and polls, and from the seat draws
- * (build-only) the most-seats shares, the party and bloc distributions and
- * the seat-sum arithmetic. `available` is false when a file is missing or
+ * (build-only) the most-seats shares, the party seat distributions and the
+ * seat-sum arithmetic. `available` is false when a file is missing or
  * fails `nowcastProblems`, and the page then says so instead of drawing zeros.
  */
 export async function loadLegislativeNowcast() {
@@ -186,18 +186,10 @@ export async function loadLegislativeNowcast() {
       file,
       simulations: seatData.length,
       mostSeats: mostSeatsShares(seatData, file.parties),
-      probabilities: {
-        rightMajority: calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold),
-        leftMajority: calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold),
-      },
       seatSums: NOWCAST_SEAT_SUMS.map(parties => ({
         parties,
         ...seatSumArithmetic(seatData, parties, majorityThreshold),
       })),
-      blocs: summariseBlocs(seatData, [
-        { key: 'left', parties: leftBlocParties },
-        { key: 'right', parties: rightBlocParties },
-      ], majorityThreshold),
       seats: summariseSeats(seatData, PARLIAMENTARY_PARTIES),
       districtForecast,
       contestedSeats,
