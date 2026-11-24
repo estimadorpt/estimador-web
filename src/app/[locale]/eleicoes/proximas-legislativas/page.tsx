@@ -208,7 +208,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                 {...frame}
               >
                 <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Votos por partido' : 'Votes by party'}>
-                  <table className="w-full min-w-[520px] border-collapse text-[14px]">
+                  <table className="w-full border-collapse text-[14px]">
                     <caption className="sr-only">
                       {pt
                         ? `Percentagem de votos estimada por partido (mediana e intervalo de 90%), resultado de ${previousDate} e variação da mediana em pontos.`
@@ -218,12 +218,12 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                       <tr className="border-b border-ink text-left align-bottom text-[12.5px] leading-4 text-graphite">
                         <th scope="col" className="pb-1.5 pr-2 font-medium">{pt ? 'Partido' : 'Party'}</th>
                         <th scope="col" className="pb-1.5 pr-2 text-right font-medium">{pt ? 'Mediana' : 'Median'}</th>
-                        <th scope="col" className="pb-1.5 pr-2 text-right font-medium">{pt ? 'Intervalo de 90%' : '90% interval'}</th>
-                        <th scope="col" className="w-[38%] min-w-[150px] pb-1.5 pr-3 font-medium">
+                        <th scope="col" className="hidden pb-1.5 pr-2 text-right font-medium sm:table-cell">{pt ? 'Intervalo de 90%' : '90% interval'}</th>
+                        <th scope="col" className="w-[38%] min-w-[130px] pb-1.5 pr-3 font-medium">
                           <span className="sr-only">{pt ? 'Intervalo e resultado anterior' : 'Interval and previous result'}</span>
                           <Ruler min={0} max={SHARE_MAX} minor={1} major={5} labels={[0, 10, 20, 30, 40]} unit="%" />
                         </th>
-                        <th scope="col" className="pb-1.5 pr-2 text-right font-medium">{previous.date.slice(0, 4)}</th>
+                        <th scope="col" className="hidden pb-1.5 pr-2 text-right font-medium md:table-cell">{previous.date.slice(0, 4)}</th>
                         <th scope="col" className="pb-1.5 text-right font-medium">{pt ? 'Variação (p.p.)' : 'Change (pp)'}</th>
                       </tr>
                     </thead>
@@ -237,11 +237,12 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                             </span>
                           </th>
                           <td className="py-1.5 pr-2 text-right"><span className="fig text-[19px] leading-6">{pct(r.median)}</span></td>
-                          <td className="whitespace-nowrap py-1.5 pr-2 text-right text-graphite">{sharePoints(r.lo90)}–{sharePoints(r.hi90)}</td>
+                          <td className="hidden whitespace-nowrap py-1.5 pr-2 text-right text-graphite sm:table-cell">{sharePoints(r.lo90)}–{sharePoints(r.hi90)}</td>
                           <td className="py-1.5 pr-3">
                             <IntervalBand lo={r.lo90 * 100} md={r.median * 100} hi={r.hi90 * 100} min={0} max={SHARE_MAX} now={previous.shares[r.party] != null ? previous.shares[r.party] * 100 : null} />
+                            <span className="mt-0.5 block whitespace-nowrap text-[12.5px] text-graphite sm:hidden">{sharePoints(r.lo90)}–{sharePoints(r.hi90)}</span>
                           </td>
-                          <td className="py-1.5 pr-2 text-right text-graphite">{previous.shares[r.party] != null ? pct(previous.shares[r.party]) : '—'}</td>
+                          <td className="hidden py-1.5 pr-2 text-right text-graphite md:table-cell">{previous.shares[r.party] != null ? pct(previous.shares[r.party]) : '—'}</td>
                           <td className="py-1.5 text-right">{change(r.party)}</td>
                         </tr>
                       ))}
