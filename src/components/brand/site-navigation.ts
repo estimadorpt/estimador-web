@@ -51,6 +51,7 @@ export interface NavLabels {
   elections: string;
   electionsArchive: string;
   electionsPresidential: string;
+  electionsNowcast: string;
   electionsParliamentary: string;
   electionsMethodology: string;
   economics: string;
@@ -78,6 +79,7 @@ export const NAV_LABEL_KEYS: Record<keyof NavLabels, string> = {
   elections: 'nav.elections',
   electionsArchive: 'elections.navArchiveGuide',
   electionsPresidential: 'elections.navPresidential',
+  electionsNowcast: 'elections.navNowcast',
   electionsParliamentary: 'elections.navParliamentary',
   electionsMethodology: 'elections.navMethodology',
   economics: 'nav.economics',
@@ -127,10 +129,11 @@ export function siteNavigation(
       })),
     },
     {
-      // The overview of the archive first; both forecasts are archives and
-      // the labels say so before the click.
+      // The live estimate first, then the overview of the archive; both
+      // forecasts are archives and the labels say so before the click.
       id: 'elections', label: labels.elections, match: ['/eleicoes'],
       dropdown: [
+        { href: '/eleicoes/proximas-legislativas', label: labels.electionsNowcast },
         { href: '/eleicoes/arquivo', label: labels.electionsArchive },
         { href: '/eleicoes/presidenciais', label: labels.electionsPresidential },
         { href: '/eleicoes/legislativas', label: labels.electionsParliamentary },

@@ -239,6 +239,11 @@
       "statusCode": 301
     },
     {
+      "route": "/eleicoes/proximas-legislativas",
+      "redirect": "/pt/eleicoes/proximas-legislativas/",
+      "statusCode": 301
+    },
+    {
       "route": "/eleicoes/presidenciais",
       "redirect": "/pt/eleicoes/presidenciais/",
       "statusCode": 301

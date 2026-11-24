@@ -4,7 +4,8 @@ import { Action } from '@/components/brand/Action';
 import { ELECTION_ROUTES } from '@/lib/config/homepage';
 import { PARLIAMENTARY_2025_FORECAST_CUTOFF, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
 import { credibleIntervalLabel, formatElectionLongDate, formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
-import { loadForecastData, loadSecondRoundData } from '@/lib/utils/data-loader';
+import { loadForecastData, loadLegislativeNowcast, loadSecondRoundData } from '@/lib/utils/data-loader';
+import { rankedByMostSeats } from '@/lib/legislative-nowcast';
 import { ChannelHead } from '@/components/instrument';
 import { likeliestWinner, mostSeats, partyWithArticle } from '@/lib/election-findings';
 import type { ElectionConfig } from '@/types';
@@ -112,9 +113,26 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
     return e.id === 'presidential-2026' ? t('electionsForecastRunoff', { date }) : t('electionsForecastAsOf', { date });
   };
 
+  // The live legislative nowcast leads the channel when its files are there;
+  // its finding is read from the seat draws like the archive's.
+  const nowcast = await loadLegislativeNowcast();
+  const nowcastLeader = nowcast.available ? rankedByMostSeats(nowcast.mostSeats.outright, nowcast.file.parties)[0] : null;
+
   return (
     <section aria-labelledby="home-elections" className="min-w-0">
-      <ChannelHead id="home-elections" title={t('electionsKicker')} href="/eleicoes/arquivo" locale={locale} serial={tSections('archiveSection').toLowerCase()} />
+      <ChannelHead id="home-elections" title={t('electionsKicker')} href={nowcast.available ? '/eleicoes/proximas-legislativas' : '/eleicoes/arquivo'} locale={locale} serial={nowcast.available ? undefined : tSections('archiveSection').toLowerCase()} />
+      {nowcast.available && nowcastLeader && (
+        <div className="min-w-0 border-b border-rule py-3">
+          <p className="text-[13px] text-graphite">
+            <span className="font-semibold text-ink">{t('nowcastTitle')}</span>{' · '}{t('nowcastDate', { date: longDate(nowcast.file.run.as_of), poll: longDate(nowcast.file.run.last_poll) })}
+          </p>
+          <p className="disp mt-1 text-[22px] leading-[1.08] md:text-[24px]">{t('nowcastFinding', { party: partyWithArticle(nowcastLeader, locale), p: formatElectionProbability(nowcast.mostSeats.outright[nowcastLeader], locale) })}</p>
+          <p className="mt-1 max-w-[70ch] text-[13px] text-graphite">{t('nowcastNote')}</p>
+          <Link href="/eleicoes/proximas-legislativas" locale={locale} className="mt-1 inline-flex min-h-11 items-center text-[15px] font-semibold text-ink underline underline-offset-4">
+            {t('nowcastOpen')}&nbsp;<span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      )}
       <p className="mt-3 max-w-[70ch] text-[14px] leading-5 text-graphite">{t('electionsText')}</p>
       <ul className="mt-3 grid gap-x-8 md:grid-cols-2">
         {elections.filter(e => ELECTION_ROUTES[e.id]).map(e => (

@@ -30,9 +30,15 @@ interface DistrictSummaryProps {
    * article's figure); 4 inside a DataCard, whose title is the h3.
    */
   headingLevel?: 3 | 4;
+  /**
+   * The note under "Mandatos em disputa" on what +1 and −1 compare with. The
+   * archive's message names 2024 and a Castelo Branco example from its own
+   * run; the live nowcast passes its own sentence.
+   */
+  seatChangeBaseline?: string;
 }
 
-export function DistrictSummary({ districtData, contestedData, closeLeadNote, headingLevel = 3 }: DistrictSummaryProps) {
+export function DistrictSummary({ districtData, contestedData, closeLeadNote, headingLevel = 3, seatChangeBaseline }: DistrictSummaryProps) {
   const t = useTranslations("forecast");
   const locale = useLocale();
   const Heading = headingLevel === 4 ? 'h4' : 'h3';
@@ -95,7 +101,7 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
               frequent seat count in that district (the exporter's
               convention), not against 2024 or one joint allocation, so a
               district's gains and losses need not balance. */}
-          <p className="text-xs text-graphite mb-4">{t("seatChangeBaseline")}</p>
+          <p className="text-xs text-graphite mb-4">{seatChangeBaseline ?? t("seatChangeBaseline")}</p>
           <div className="grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3">
             {contestedDistricts.slice(0, 9).map(district => {
               // Every party past the 5% mark, not the first three: Lisboa's

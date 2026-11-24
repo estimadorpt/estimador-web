@@ -199,6 +199,47 @@ feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => {
 feed('elections/parliamentary-2025/contested_summary.json', value =>
   isObject(value) && isObject(value.districts) ? null : 'no districts');
 
+// ---- elections: the live legislative nowcast -------------------------------
+//
+// Written every day by the job on the Mac (estimador-elections
+// src/export_nowcast_web.py, scripts/nowcast_daily.sh). These are the same
+// rules as nowcastProblems in src/lib/legislative-nowcast.ts: a file that
+// breaks one would put a wrong page online, so the deploy stops instead.
+
+const NOWCAST = 'elections/legislative-nowcast';
+const isDay = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+let nowcastParties = null;
+feed(`${NOWCAST}/nowcast.json`, value => {
+  if (!isObject(value) || value.schema !== 1 || value.kind !== 'nowcast') return 'not a schema 1 nowcast';
+  const run = value.run;
+  if (!isObject(run) || !isDay(run.last_poll) || !isDay(run.as_of)) return 'run dates missing';
+  if (run.diagnostics?.passes_gate !== true) return 'the run did not pass the convergence gate';
+  if (run.bias_form !== 'none') return `bias form ${run.bias_form} is a scenario, not the published nowcast`;
+  if (!nonEmptyArray(value.national)) return 'no national shares';
+  const total = value.national.reduce((sum, r) => sum + r.mean, 0);
+  if (Math.abs(total - 1) > 0.005) return `mean shares add up to ${total.toFixed(4)}`;
+  const disorder = value.national.find(r => !(r.lo90 <= r.lo50 && r.lo50 <= r.median && r.median <= r.hi50 && r.hi50 <= r.hi90));
+  if (disorder) return `${disorder.party}: ranges out of order`;
+  const dates = value.trend?.dates;
+  if (!nonEmptyArray(dates) || dates.at(-1) !== run.last_poll) return 'the trend does not end on the last poll';
+  if (!isObject(value.previous?.shares) || !isDay(value.previous?.date)) return 'no previous election';
+  if (!Array.isArray(value.polls) || value.polls.length !== run.polls_since_previous) return 'poll list and run disagree';
+  nowcastParties = value.national.map(r => r.party);
+  return null;
+});
+feed(`${NOWCAST}/seat_forecast_simulations.json`, value => {
+  if (!nonEmptyArray(value)) return 'empty';
+  if (!value.every(row => isObject(row) && row.original_sample_id != null)) return 'rows without original_sample_id';
+  if (nowcastParties) {
+    const bad = value.findIndex(row => nowcastParties.reduce((sum, p) => sum + (row[p] ?? 0), 0) !== 230);
+    if (bad >= 0) return `draw ${bad} does not add up to 230 seats`;
+  }
+  return null;
+}, { buildOnly: true });
+feed(`${NOWCAST}/district_forecast.json`, value => (nonEmptyArray(value) ? null : 'empty'));
+feed(`${NOWCAST}/contested_summary.json`, value =>
+  isObject(value) && isObject(value.districts) ? null : 'no districts');
+
 for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'presidential_win_probabilities.json']) {
   feed(`elections/presidential-2026/${name}`, value =>
     nonEmptyArray(value) || isObject(value) ? null : 'empty');
@@ -226,7 +267,7 @@ feed('elections/presidential-2026/second_round_trajectories.json', value => {
 }, { buildOnly: true });
 // The raw draws must not drift back into the export (BL-12: 8.6 MB of the
 // Azure size budget, read only at build time).
-for (const relative of ['elections/presidential-2026/second_round_trajectories.json', 'elections/parliamentary-2025/seat_forecast_simulations.json', 'elections/parliamentary-2025/national_trends.json']) {
+for (const relative of ['elections/presidential-2026/second_round_trajectories.json', 'elections/parliamentary-2025/seat_forecast_simulations.json', 'elections/parliamentary-2025/national_trends.json', 'elections/legislative-nowcast/seat_forecast_simulations.json']) {
   if (fs.existsSync(path.join(DATA, relative))) problems.push(`${relative}: build-only input is under public/data — keep it in data/build-only/`);
 }
 feed('elections/presidential-2026/second_round_blank_null.json', value =>

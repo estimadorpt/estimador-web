@@ -27,6 +27,7 @@ import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/conf
 import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
 import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
 import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
+import { mostSeatsShares, NOWCAST_DIR, nowcastProblems, type NowcastFile } from '@/lib/legislative-nowcast';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -151,6 +152,63 @@ export async function loadParliamentaryArchive() {
 }
 
 export type ParliamentaryArchive = Awaited<ReturnType<typeof loadParliamentaryArchive>>;
+
+/** Seat groupings the nowcast states as arithmetic (never as a forecast of a government). */
+export const NOWCAST_SEAT_SUMS: ReadonlyArray<readonly string[]> = [
+  ['AD', 'IL'],
+  ['AD', 'CH'],
+  ['AD', 'IL', 'CH'],
+  ['PS', 'L', 'CDU', 'BE'],
+];
+
+/**
+ * The live legislative nowcast, summarised on the server like the archive:
+ * the page gets the file's shares, trend and polls, and from the seat draws
+ * (build-only) the most-seats shares, the party and bloc distributions and
+ * the seat-sum arithmetic. `available` is false when a file is missing or
+ * fails `nowcastProblems`, and the page then says so instead of drawing zeros.
+ */
+export async function loadLegislativeNowcast() {
+  try {
+    const [file, seatData, districtForecast, contestedSeats] = await Promise.all([
+      loadJsonData<NowcastFile>('nowcast.json', NOWCAST_DIR),
+      loadBuildOnlyJson<SeatData[]>('seat_forecast_simulations.json', NOWCAST_DIR),
+      loadJsonData<DistrictForecast[]>('district_forecast.json', NOWCAST_DIR),
+      loadJsonData<ContestedSummary>('contested_summary.json', NOWCAST_DIR),
+    ]);
+    const problems = nowcastProblems(file);
+    if (problems.length > 0 || seatData.length === 0) {
+      console.error(`[nowcast] not drawn: ${problems.join('; ') || 'no seat draws'}`);
+      return { available: false as const };
+    }
+    return {
+      available: true as const,
+      file,
+      simulations: seatData.length,
+      mostSeats: mostSeatsShares(seatData, file.parties),
+      probabilities: {
+        rightMajority: calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold),
+        leftMajority: calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold),
+      },
+      seatSums: NOWCAST_SEAT_SUMS.map(parties => ({
+        parties,
+        ...seatSumArithmetic(seatData, parties, majorityThreshold),
+      })),
+      blocs: summariseBlocs(seatData, [
+        { key: 'left', parties: leftBlocParties },
+        { key: 'right', parties: rightBlocParties },
+      ], majorityThreshold),
+      seats: summariseSeats(seatData, PARLIAMENTARY_PARTIES),
+      districtForecast,
+      contestedSeats,
+    };
+  } catch (error) {
+    console.error('[nowcast] files missing or unreadable:', error);
+    return { available: false as const };
+  }
+}
+
+export type LegislativeNowcast = Awaited<ReturnType<typeof loadLegislativeNowcast>>;
 
 const EMPTY_PRESIDENTIAL_TRENDS = { election_date: PRESIDENTIAL_2026.date, dates: [] as string[], candidates: {} };
 

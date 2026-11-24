@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Sections
 - **População** (`/populacao/`) — open synthetic population v1.0.3 (Censos 2021), parish by parish (see "Population section")
 - **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts, updated every matchday
+- **Próximas legislativas** (`/eleicoes/proximas-legislativas/`) — the live legislative nowcast: what the polls give if the vote were on the day of the latest poll, refitted by a job on the Mac whenever a new poll appears (see "Live legislative nowcast")
 - **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — archived forecast (both rounds)
 - **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — archived forecast; `/eleicoes/arquivo/` explains how to read both
 - **Economia** (`/economia/`) — **in preparation** (see "Economy section"): explainers online, no figures published
@@ -168,6 +169,7 @@ the paths below omit it.
 /desporto/liga/metodologia/        → Liga Portugal methodology
 /economia/                         → Economy (in preparation; noindex while unpublished)
 /economia/metodologia/             → Economy methodology
+/eleicoes/proximas-legislativas/   → Live legislative nowcast (no election date; updated by the Mac job)
 /eleicoes/arquivo/                 → How to read the archived election forecasts
 /eleicoes/presidenciais/           → Presidential 2026 forecast (archive)
 /eleicoes/legislativas/            → Parliamentary 2025 forecast (archive)
@@ -412,7 +414,7 @@ Then:
   release counts from `meta.json` in one sentence (`home.populationText`), the no-margin sign and
   `HONESTY.synthetic` before any further figure, the parish search, today's Freguesia misteriosa
   and the open data as text links.
-- **Eleições, arquivo** (`ElectionsPanel` standard variant): one dated finding per election, read
+- **Eleições** (`ElectionsPanel` standard variant): the live nowcast first when its files are there (its leader for most seats and the share of draws, `home.nowcast*`, linked to `/eleicoes/proximas-legislativas`), then the archive: one dated finding per election, read
   from its own files ("António José Seguro vencia a 2.ª volta em mais de 99% das simulações";
   "A AD elegia mais deputados do que qualquer outro partido em mais de 99% das simulações", from
   the 9 000 seat draws), each with a link to its archive page.
@@ -649,6 +651,7 @@ public/data/
   elections/
     presidential-2026/          # Presidential archive: 13 files the pages read
     parliamentary-2025/         # Parliamentary archive: 4 files (district forecast, contested summary, house effects, TopoJSON)
+    legislative-nowcast/        # Live nowcast: nowcast.json, district_forecast.json, contested_summary.json (written by the Mac job)
   football/
     liga-2026-27/               # Current season: md*.json + md*_scenarios.json, players, game fixtures, injuries
     liga-2025-26/               # Last season: matchday files + review.json (archive)
@@ -659,6 +662,7 @@ data/build-only/elections/      # Raw simulation draws read only at build time, 
   presidential-2026/second_round_trajectories.json   (8.6 MB, 8000 runoff trajectories)
   parliamentary-2025/seat_forecast_simulations.json  (9000 seat draws)
   parliamentary-2025/national_trends.json            (1.4 MB of long poll-trend rows)
+  legislative-nowcast/seat_forecast_simulations.json (8000 seat draws: 2000 model draws × 4 emigration scenarios)
 ```
 
 Election pages pass no raw draws or long rows to the browser: `loadBuildOnlyJson` (in
@@ -739,11 +743,28 @@ All chart components follow a consistent pattern:
 - The published forecasts come from `bivcross` (bivariate Poisson with shots on target) since matchday 1 of 2026-27; md00 was `joint_sot`. Each md file names its model in `model`. Model codenames appear only on `/desporto/liga/dados`, never in reader-facing copy.
 - Several older components in that folder (PositionHeatmap, CriticalPaths, PathsToVictory, PointsPace, MatchdayLive, ScheduleDifficulty) are imported by no page; do not build on them without checking.
 
+### Live legislative nowcast
+
+`/eleicoes/proximas-legislativas` (`src/app/[locale]/eleicoes/proximas-legislativas/page.tsx`, copy
+inline in pt/en) reads `loadLegislativeNowcast()` (`data-loader.ts`): `nowcast.json` (run facts and
+diagnostics, national shares with 50% and 90% ranges, the 2025 result over the eight modelled
+parties, the weekly poll average since the election, the polls as published), the build-only seat
+draws, `district_forecast.json` and `contested_summary.json`. Types, `mostSeatsShares` (ties count
+for no one), `weeklyFrom` and `nowcastProblems` live in `src/lib/legislative-nowcast.ts`;
+`validate-data` applies the same rules, so a bad file stops the deploy and the last good estimate
+stays online. The files come from estimador-elections (`src/export_nowcast_web.py`), pushed to
+`main` by `pt.estimador.nowcast` on the Mac (`scripts/nowcast_daily.sh`, runbook
+`docs/live_nowcast.md` there): every hour it checks the poll feed and refits only when it holds new
+polls. Data-only pushes: every date, number and finding on the page and in the homepage's elections
+channel is read from the files, never typed, and no test pins a value. The headline is the party with
+most seats in the most draws; the trend's band leaves out the shared polling error (the page says so),
+the national ranges include it. No share card of its own yet (it uses the elections/brand card).
+
 ### Election Chart Components (`src/components/charts/`)
 - **HouseEffects.tsx**: Custom HTML/CSS matrix with no hover tooltip (an exception to the hover-tip rule above): each cell's `title` and the `<ChartTable>` twin carry the exact values; the cell colours come from `src/lib/election-heatmap.ts` (one forest ink on every cell, the red and blue ramps capped where it still reaches 4.5:1, `election-heatmap.test.ts` sweeps them)
 - **CoalitionDotPlot.tsx**: the two blocs' seat totals as a dot histogram (stacked dots: `drawnSeatIndices`, every 12th model draw with its three emigration scenarios, 750 dots, about 200 on phones; never every k-th row, which drew only the 2024 scenario); the bloc colours are PS's and AD's (under 3:1 on white, so every row names its bloc)
-- **DistrictSummary.tsx**: ENSC methodology for contested seats; each district card shows every party above 5% (`seatChangesOf`, `SEAT_CHANGE_SHOWN`) with "+1/−1 mandato ou mais"; the third tile is "Abaixo do limiar (ENSC ≤ 0,8)", with a watch line for districts between 0,4 and 0,8 (`districtsToWatch`); `CONTESTED_ENSC` and `WATCH_ENSC` live in `election-aggregates.ts`
-- **PollingChart.tsx**: takes a columnar `TrendSeries` (`compactTrendSeries` in `election-aggregates.ts`) instead of long rows, so the page payload stays small
+- **DistrictSummary.tsx**: ENSC methodology for contested seats (`seatChangeBaseline` replaces the archive's note, which names 2024 and Castelo Branco); each district card shows every party above 5% (`seatChangesOf`, `SEAT_CHANGE_SHOWN`) with "+1/−1 mandato ou mais"; the third tile is "Abaixo do limiar (ENSC ≤ 0,8)", with a watch line for districts between 0,4 and 0,8 (`districtsToWatch`); `CONTESTED_ENSC` and `WATCH_ENSC` live in `election-aggregates.ts`
+- **PollingChart.tsx**: takes a columnar `TrendSeries` (`compactTrendSeries` in `election-aggregates.ts`) instead of long rows, so the page payload stays small; `band` names the band's coverage (the archive's 94% HDI by default, the nowcast's central 90%)
 - **Numbers** (`src/lib/election-display.ts`): election probabilities print "menos de 1%" / "mais de 99%" ("under 1%" / "over 99%") everywhere, tables and twins included, never "<1%" or 0% and 100% (`formatElectionProbability`, `electionProbabilityParts` for a headline figure); counts group from four digits (`formatElectionNumber` uses `useGrouping: 'always'`: "9 000" with a no-break space in Portuguese, like `formatInteger` and `formatCount`), and the methodology MDX writes its counts the same way by hand ("9 000", "8 000", "1 000"). Dates: `formatElectionDate` for table columns ("09/01/2026", dd/mm/aaaa so the column lines up; "9 Jan 2026"), `formatElectionShortDate` for chart ticks and tips ("6 fev. 2026"), `formatElectionLongDate` for readouts and footers. `PARLIAMENTARY_PARTY_ORDER` (AD PS CH IL L CDU BE PAN) and `sortByPartyOrder` are the archive's one party order, so the left bloc reads PS + L + CDU + BE (`src/lib/config/blocs.ts` still lists it PS, BE, CDU, L: sort it before showing it). The round switch is choice boxes made of links (`choiceClass`, `?round=1`, `aria-current`; without JavaScript `?round=1` still shows round 2, a static export serves one file). The archived charts have no filters: every line is named at its end (the presidential lines with their last estimate and 90% interval; `PollingChart` draws every party, with bands on the three largest only), and the district map's readout sits beside the map (under it on a phone) in a live region present from load.
 - **Sections with one chart**: an h2 finding (`src/lib/election-findings.ts`: "António José Seguro vencia a 2.ª volta em mais de 99% das simulações") or statement, then the `<DataCard>`, whose subtitle carries the explanation; no grey lede between them.
 - The election methodology is its own page, `/eleicoes/metodologia` (`src/content/methodology/eleicoes/{pt,en}.mdx`, dated). Every h2 and h3 there and on `/economia/metodologia` gets a slug id (`headingSlug`, `headingText` in `src/lib/election-methodology.ts`), so keep heading texts unique; charts deep-link through `ELECTION_METHOD_ANCHORS` and `electionMethodHref(section, locale)`, and `election-methodology.test.ts` keeps the anchors and the MDX in step; the `/metodologia` page's elections row carries the old `#eleicoes` and `#segunda-volta-2026` anchors.
@@ -873,7 +894,7 @@ Buttondown as the processor; keep that section true to what the card actually do
 
 ### Data Updates
 - **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`; it drops the model's `cards.json`, which is not a published feed. After a round's last game, sync and deploy the next `mdNN` within 24 hours: the reader's clock (`ClockSwitch`) covers the gap on the pages, but the static meta descriptions of that round's match pages keep the pre-match odds until the rebuild. Dates and the season's other chores: `docs/football-runbook.md`; asks for the model repository: `docs/football-producer-asks.md`
-- **Elections**: Manually update JSON files in `public/data/elections/`
+- **Elections**: the archives are frozen in `public/data/elections/`; the live nowcast is written by a job (see "Live legislative nowcast"), never by hand
 - **Economics**: Run `./scripts/sync-data.sh economics` to copy `dashboard_latest.json` (and `stories_latest.json`) from `~/code/estimador-economics/output/`. Not part of `all`, and a no-op until `economy-status.json` says `published: true`: publishing is the flag, not the sync.
 
 ### Ecosystem Architecture
