@@ -756,9 +756,13 @@ stays online. The files come from estimador-elections (`src/export_nowcast_web.p
 `main` by `pt.estimador.nowcast` on the Mac (`scripts/nowcast_daily.sh`, runbook
 `docs/live_nowcast.md` there): every hour it checks the poll feed and refits only when it holds new
 polls. Data-only pushes: every date, number and finding on the page and in the homepage's elections
-channel is read from the files, never typed, and no test pins a value. The headline is the party with
-most seats in the most draws; the trend's band leaves out the shared polling error (the page says so),
-the national ranges include it. No share card of its own yet (it uses the elections/brand card).
+channel is read from the files, never typed, and no test pins a value. Structure (after a phone review and Fable's
+review, 24 November 2026): the h1 is the party with most seats in the most draws, the lede the seat
+sum that reaches 116 most often; then who wins most seats (`ProbBar` rows), the seat sums, votes and
+seats in one grammar (median, `IntervalBand` 90%, the 2025 result as the square on votes, 116 dashed
+on seats; `seatRanges`), the poll average since the election (its band leaves out the shared polling
+error, the national ranges include it), districts and polls behind disclosures, then the method.
+Every h2 is a finding built from the files, with fallbacks when the numbers change shape. No share card of its own yet (it uses the elections/brand card).
 
 ### Election Chart Components (`src/components/charts/`)
 - **HouseEffects.tsx**: Custom HTML/CSS matrix with no hover tooltip (an exception to the hover-tip rule above): each cell's `title` and the `<ChartTable>` twin carry the exact values; the cell colours come from `src/lib/election-heatmap.ts` (one forest ink on every cell, the red and blue ramps capped where it still reaches 4.5:1, `election-heatmap.test.ts` sweeps them)

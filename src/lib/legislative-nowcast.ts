@@ -7,7 +7,7 @@
  * job pushes data-only commits, so a test or a sentence that pins a value
  * would break (or lie) on the next run.
  */
-import type { SeatDraw, TrendSeries } from '@/lib/election-aggregates';
+import { quantileSorted, type SeatDraw, type TrendSeries } from '@/lib/election-aggregates';
 
 /** Under public/data and data/build-only. */
 export const NOWCAST_DIR = 'elections/legislative-nowcast';
@@ -110,6 +110,30 @@ export function mostSeatsShares(draws: readonly SeatDraw[], parties: readonly st
   }
   for (const party of parties) outright[party] /= draws.length;
   return { outright, tie: ties / draws.length };
+}
+
+/** One party's seats over every draw: the median and the central 90% interval, as the votes table reads its shares. */
+export interface SeatRange {
+  party: string;
+  median: number;
+  lo90: number;
+  hi90: number;
+}
+
+/** Seat ranges for the parties, largest median first (whole seats, rounded). */
+export function seatRanges(draws: readonly SeatDraw[], parties: readonly string[]): SeatRange[] {
+  if (draws.length === 0) return [];
+  return parties
+    .map(party => {
+      const sorted = draws.map(d => seatsOf(d, party)).sort((a, b) => a - b);
+      return {
+        party,
+        median: Math.round(quantileSorted(sorted, 0.5)),
+        lo90: Math.round(quantileSorted(sorted, 0.05)),
+        hi90: Math.round(quantileSorted(sorted, 0.95)),
+      };
+    })
+    .sort((a, b) => b.median - a.median || b.hi90 - a.hi90);
 }
 
 /** The parties by their chance of most seats, highest first (ties broken by the national median order). */

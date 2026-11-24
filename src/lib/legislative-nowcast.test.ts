@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { mostSeatsShares, nowcastProblems, rankedByMostSeats, weeklyFrom, type NowcastFile } from './legislative-nowcast';
+import { mostSeatsShares, nowcastProblems, rankedByMostSeats, seatRanges, weeklyFrom, type NowcastFile } from './legislative-nowcast';
 
 const PARTIES = ['PS', 'CH', 'AD'];
 
@@ -21,6 +21,16 @@ describe('mostSeatsShares', () => {
 
   it('reads no share from an empty file', () => {
     expect(Number.isNaN(mostSeatsShares([], PARTIES).tie)).toBe(true);
+  });
+});
+
+describe('seatRanges', () => {
+  it('gives each party its median and central 90% in whole seats, largest first', () => {
+    const draws = Array.from({ length: 101 }, (_, i) => ({ PS: 50 + i, CH: 40, AD: 140 - i }));
+    const [first, second] = seatRanges(draws, PARTIES);
+    expect(first).toEqual({ party: 'PS', median: 100, lo90: 55, hi90: 145 });
+    expect(second.party).toBe('AD');
+    expect(seatRanges([], PARTIES)).toEqual([]);
   });
 });
 

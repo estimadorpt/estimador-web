@@ -27,7 +27,7 @@ import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/conf
 import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
 import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
 import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
-import { mostSeatsShares, NOWCAST_DIR, nowcastProblems, type NowcastFile } from '@/lib/legislative-nowcast';
+import { mostSeatsShares, NOWCAST_DIR, nowcastProblems, seatRanges, type NowcastFile } from '@/lib/legislative-nowcast';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -190,7 +190,7 @@ export async function loadLegislativeNowcast() {
         parties,
         ...seatSumArithmetic(seatData, parties, majorityThreshold),
       })),
-      seats: summariseSeats(seatData, PARLIAMENTARY_PARTIES),
+      seats: seatRanges(seatData, file.parties),
       districtForecast,
       contestedSeats,
     };
