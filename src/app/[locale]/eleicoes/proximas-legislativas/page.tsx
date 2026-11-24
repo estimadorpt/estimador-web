@@ -112,8 +112,8 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
     ? `Fonte: modelo estimador.pt, ${count(nowcast.simulations)} simulações`
     : `Source: estimador.pt model, ${count(nowcast.simulations)} simulations`;
   const pollsSource = pt
-    ? `Fonte: modelo estimador.pt, ${count(run.polls_since_previous)} sondagens desde ${previousDate}`
-    : `Source: estimador.pt model, ${count(run.polls_since_previous)} polls since ${previousDate}`;
+    ? `Fonte: modelo estimador.pt, ${count(file.polls.length)} sondagens desde ${previousDate}`
+    : `Source: estimador.pt model, ${count(file.polls.length)} polls since ${previousDate}`;
 
   const rightName = sortByPartyOrder(rightBlocParties).join(' + ');
   const leftName = sortByPartyOrder(leftBlocParties).join(' + ');
@@ -148,8 +148,8 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
           eyebrow={eyebrow}
           title={finding}
           lede={pt
-            ? `Não há eleições marcadas. Lemos as ${count(run.polls_since_previous)} sondagens publicadas desde as legislativas de ${previousDate} e estimamos o resultado se a votação fosse no dia da última, ${lastPoll}. A estimativa volta a correr sempre que sai uma sondagem nova.`
-            : `No election has been called. We read the ${count(run.polls_since_previous)} polls published since the ${previousDate} election and estimate the result if the vote were held on the day of the latest, ${lastPoll}. The estimate runs again whenever a new poll comes out.`}
+            ? `Não há eleições marcadas. Lemos as ${count(file.polls.length)} sondagens publicadas desde as legislativas de ${previousDate} e estimamos o resultado se a votação fosse no dia da última, ${lastPoll}. A estimativa volta a correr sempre que sai uma sondagem nova.`
+            : `No election has been called. We read the ${count(file.polls.length)} polls published since the ${previousDate} election and estimate the result if the vote were held on the day of the latest, ${lastPoll}. The estimate runs again whenever a new poll comes out.`}
           meta={<span>{pt ? `Estimativa de ${runDate} · sondagens até ${lastPoll}` : `Estimate of ${runDate} · polls up to ${lastPoll}`}</span>}
         />
 
@@ -370,8 +370,8 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                 <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Um erro que todas as sondagens partilham' : 'An error all polls share'}</h3>
                 <p>
                   {pt
-                    ? 'No dia da votação, as sondagens podem errar todas para o mesmo lado: em 2024 e 2025 subestimaram o Chega em 4 a 5 pontos. Juntamos um erro desse tamanho, medido nas seis legislativas de 2011 a 2025, e é por isso que os intervalos são largos. Nesse teste, a direção do erro não se repetiu de forma fiável de uma eleição para a seguinte, por isso não a corrigimos.'
-                    : 'On election day, the polls can all miss the same way: in 2024 and 2025 they underestimated Chega by 4 to 5 points. We add an error of that size, measured over the six parliamentary elections from 2011 to 2025, which is why the intervals are wide. In that test the direction of the miss did not repeat reliably from one election to the next, so we do not correct for it.'}
+                    ? 'No dia da votação, as sondagens podem errar todas para o mesmo lado: em 2025 deram ao Chega 18,4% em média, e teve 22,8%. Juntamos um erro desse tamanho, medido nas seis legislativas de 2011 a 2025, e é por isso que os intervalos são largos. Nesse teste, a direção do erro não se repetiu de forma fiável de uma eleição para a seguinte, por isso não a corrigimos.'
+                    : 'On election day, the polls can all miss the same way: in 2025 they gave Chega 18.4% on average, and it won 22.8%. We add an error of that size, measured over the six parliamentary elections from 2011 to 2025, which is why the intervals are wide. In that test the direction of the miss did not repeat reliably from one election to the next, so we do not correct for it.'}
                 </p>
               </div>
               <div>

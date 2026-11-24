@@ -223,7 +223,7 @@ feed(`${NOWCAST}/nowcast.json`, value => {
   const dates = value.trend?.dates;
   if (!nonEmptyArray(dates) || dates.at(-1) !== run.last_poll) return 'the trend does not end on the last poll';
   if (!isObject(value.previous?.shares) || !isDay(value.previous?.date)) return 'no previous election';
-  if (!Array.isArray(value.polls) || value.polls.length !== run.polls_since_previous) return 'poll list and run disagree';
+  if (!Array.isArray(value.polls) || value.polls.length === 0 || Math.abs(value.polls.length - run.polls_since_previous) > 3) return 'poll list and run disagree';
   nowcastParties = value.national.map(r => r.party);
   return null;
 });

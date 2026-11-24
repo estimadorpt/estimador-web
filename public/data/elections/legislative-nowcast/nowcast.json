@@ -3,8 +3,8 @@
  "kind": "nowcast",
  "run": {
   "id": "ACCEPTED_legislative_nowcast_rw_v1_nobias_20261124",
-  "code": "51f0fb3cd01dda2d1e30049d8fad8851bcbea4a1",
-  "export_code": "1ccf0e148ab5e0026221f644baa02446383409fb",
+  "code": "3859d766286ed71b50caf988258458242359e207",
+  "export_code": "f500397905171de5f3eb8803cbdc51073c79b1c7",
   "model": "random walk (src/models/poll_rw_model.py)",
   "bias_form": "none",
   "as_of": "2026-11-24",
@@ -24,7 +24,7 @@
    "n_values": 11846,
    "passes_gate": true
   },
-  "exported_at": "2026-11-24T17:30:19Z"
+  "exported_at": "2026-11-24T19:05:30Z"
  },
  "parties": [
   "PS",

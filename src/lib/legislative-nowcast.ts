@@ -12,6 +12,9 @@ import type { SeatDraw, TrendSeries } from '@/lib/election-aggregates';
 /** Under public/data and data/build-only. */
 export const NOWCAST_DIR = 'elections/legislative-nowcast';
 
+/** How far the listed polls may differ from the number the model read (see nowcastProblems). */
+export const MAX_POLL_COUNT_GAP = 3;
+
 /** One party's national share: the median and the central 50% and 90% ranges, polling error included. */
 export interface NowcastNationalRow {
   party: string;
@@ -153,6 +156,8 @@ export function nowcastProblems(file: unknown): string[] {
   if (!trend || trend.dates.length < 2) problems.push('trend');
   else if (trend.dates.at(-1) !== run.last_poll) problems.push(`trend ends ${trend.dates.at(-1)}, last poll ${run.last_poll}`);
   if (!f.previous?.date || !f.previous.shares) problems.push('previous election');
-  if (!Array.isArray(f.polls) || f.polls.length !== run.polls_since_previous) problems.push('polls');
+  // The list is the feed's rows the loader keeps; the model's own count can differ by a poll or
+  // two (a poll the Marktest history already held), never by more.
+  if (!Array.isArray(f.polls) || f.polls.length === 0 || Math.abs(f.polls.length - run.polls_since_previous) > MAX_POLL_COUNT_GAP) problems.push('polls');
   return problems;
 }
