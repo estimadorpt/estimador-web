@@ -133,8 +133,8 @@ export interface PopulationRecipe {
   surfaces: PublicSurface[];
 }
 
-/** The eight portrait recipes, in the producer's manifest order. */
-export type PortraitRecipe =
+/** The eight portrait recipes every release since v1.0.0 answers, in the producer's manifest order. */
+export type CoreRecipe =
   | 'elders_alone'
   | 'who_lives_alone'
   | 'multigenerational'
@@ -143,6 +143,40 @@ export type PortraitRecipe =
   | 'education'
   | 'household_size'
   | 'household_type';
+
+/**
+ * The questions v1.2 and its census-facts layer add to the parish page
+ * (contract: docs/population/v1.2-parish-questions.md §2). Most are fixed per
+ * parish by an INE table the population was fitted or tilted to; the last four
+ * are modelled, anchored at município level at most (§2e). A release
+ * that does not carry one simply has no card for it: the page, the sync and
+ * the tests read them as optional.
+ */
+export type LayerRecipe =
+  | 'nationality'
+  | 'marital'
+  | 'income_source'
+  | 'sitprof'
+  | 'occupation'
+  | 'industry'
+  | 'work_place'
+  | 'transport'
+  | 'tenure'
+  | 'rooms'
+  | 'building_period'
+  | 'accessibility'
+  | 'lived_abroad'
+  | 'literate'
+  // Modelled: no parish table fixes them; their own section, labelled (Bernardo, 18 Nov 2026).
+  | 'income'
+  | 'birthplace'
+  | 'residence_2019'
+  | 'school_attendance';
+
+export type PortraitRecipe = CoreRecipe | LayerRecipe;
+
+/** A parish's responses: the eight core ones always, the layer ones when the release carries them. */
+export type ParishResponses = Record<CoreRecipe, CompactResponse> & Partial<Record<LayerRecipe, CompactResponse>>;
 
 export type RecipeName = PortraitRecipe | 'national_age';
 
@@ -178,7 +212,7 @@ export interface ParishRecord {
    * file before places.json arrives (written by the sync from v1.0.3 on).
    */
   place?: ParishPlace;
-  responses: Record<PortraitRecipe, CompactResponse>;
+  responses: ParishResponses;
 }
 
 export interface ParishPlace {
@@ -303,7 +337,8 @@ export interface GameEntry {
   order: number;
   code: string;
   tier: 'A' | 'B' | 'C';
-  responses: Record<PortraitRecipe, CompactResponse>;
+  /** The game deck carries the core recipes only; its calendar never changes with a release. */
+  responses: Record<CoreRecipe, CompactResponse>;
 }
 
 export interface ScorecardValue {

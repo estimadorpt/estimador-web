@@ -1,0 +1,1311 @@
+{
+ "_comment": "Synthetic values for the v1.2 parish questions (docs/population/v1.2-parish-questions.md). data_status fixture: never served, never a real figure. income_band codes are the income thread’s seven bands (18 Nov 2026).",
+ "data_status": "fixture",
+ "parish": "010103",
+ "recipes": {
+  "nationality": {
+   "unit": "person",
+   "dimensions": [
+    "nationality_group"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "marital": {
+   "unit": "person",
+   "dimensions": [
+    "marital_status_code"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "income_source": {
+   "unit": "person",
+   "dimensions": [
+    "income_source_code"
+   ],
+   "filters": [
+    {
+     "field": "age_5y",
+     "operator": "in",
+     "values": [
+      "15 - 19 anos",
+      "20 - 24 anos",
+      "25 - 29 anos",
+      "30 - 34 anos",
+      "35 - 39 anos",
+      "40 - 44 anos",
+      "45 - 49 anos",
+      "50 - 54 anos",
+      "55 - 59 anos",
+      "60 - 64 anos",
+      "65 - 69 anos",
+      "70 - 74 anos",
+      "75 - 79 anos",
+      "80 - 84 anos",
+      "85 - 89 anos",
+      "90 ou mais anos"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "lived_abroad": {
+   "unit": "person",
+   "dimensions": [
+    "lived_abroad"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "literate": {
+   "unit": "person",
+   "dimensions": [
+    "literate"
+   ],
+   "filters": [
+    {
+     "field": "age_5y",
+     "operator": "in",
+     "values": [
+      "10 - 14 anos",
+      "15 - 19 anos",
+      "20 - 24 anos",
+      "25 - 29 anos",
+      "30 - 34 anos",
+      "35 - 39 anos",
+      "40 - 44 anos",
+      "45 - 49 anos",
+      "50 - 54 anos",
+      "55 - 59 anos",
+      "60 - 64 anos",
+      "65 - 69 anos",
+      "70 - 74 anos",
+      "75 - 79 anos",
+      "80 - 84 anos",
+      "85 - 89 anos",
+      "90 ou mais anos"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "sitprof": {
+   "unit": "person",
+   "dimensions": [
+    "sitprof_code"
+   ],
+   "filters": [
+    {
+     "field": "employment_status_code",
+     "operator": "eq",
+     "values": [
+      "11"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "occupation": {
+   "unit": "person",
+   "dimensions": [
+    "occupation_major"
+   ],
+   "filters": [
+    {
+     "field": "employment_status_code",
+     "operator": "eq",
+     "values": [
+      "11"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "industry": {
+   "unit": "person",
+   "dimensions": [
+    "industry_section"
+   ],
+   "filters": [
+    {
+     "field": "employment_status_code",
+     "operator": "eq",
+     "values": [
+      "11"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "work_place": {
+   "unit": "person",
+   "dimensions": [
+    "work_location_type"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "transport": {
+   "unit": "person",
+   "dimensions": [
+    "transport_mode"
+   ],
+   "filters": [
+    {
+     "field": "work_location_type",
+     "operator": "in",
+     "values": [
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "tenure": {
+   "unit": "household",
+   "dimensions": [
+    "hh_tenure_code"
+   ],
+   "filters": [
+    {
+     "field": "is_institutional",
+     "operator": "eq",
+     "values": [
+      "0"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "rooms": {
+   "unit": "household",
+   "dimensions": [
+    "hh_rooms_bin"
+   ],
+   "filters": [
+    {
+     "field": "is_institutional",
+     "operator": "eq",
+     "values": [
+      "0"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "building_period": {
+   "unit": "household",
+   "dimensions": [
+    "building_period_code"
+   ],
+   "filters": [
+    {
+     "field": "is_institutional",
+     "operator": "eq",
+     "values": [
+      "0"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "accessibility": {
+   "unit": "household",
+   "dimensions": [
+    "accessibility_code"
+   ],
+   "filters": [
+    {
+     "field": "is_institutional",
+     "operator": "eq",
+     "values": [
+      "0"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "income": {
+   "unit": "person",
+   "dimensions": [
+    "income_band"
+   ],
+   "filters": [
+    {
+     "field": "adult_18_plus",
+     "operator": "eq",
+     "values": [
+      "1"
+     ]
+    },
+    {
+     "field": "is_institutional",
+     "operator": "eq",
+     "values": [
+      "0"
+     ]
+    }
+   ],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "birthplace": {
+   "unit": "person",
+   "dimensions": [
+    "birthplace"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "residence_2019": {
+   "unit": "person",
+   "dimensions": [
+    "residence_2019"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  },
+  "school_attendance": {
+   "unit": "person",
+   "dimensions": [
+    "school_attendance"
+   ],
+   "filters": [],
+   "measure": "share",
+   "normalization": "grand_total",
+   "minimum_tier": "C",
+   "surfaces": [
+    "portrait"
+   ]
+  }
+ },
+ "responses": {
+  "nationality": {
+   "id": "q1_fixture00national",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "PT"
+     ],
+     0.7900819163116561,
+     "79,0%"
+    ],
+    [
+     [
+      "Foreign"
+     ],
+     0.20991808368834394,
+     "21,0%"
+    ]
+   ]
+  },
+  "marital": {
+   "id": "q1_fixture01marital",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.9455787936833494,
+     "94,6%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.05056980954665479,
+     "5,1%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.003851396769995777,
+     "0,4%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "income_source": {
+   "id": "q1_fixture02incomeso",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.3960887007409821,
+     "39,6%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.1411446405138154,
+     "14,1%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.12028590861146404,
+     "12,0%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.10476046345959791,
+     "10,5%"
+    ],
+    [
+     [
+      "5"
+     ],
+     0.09722431418355516,
+     "9,7%"
+    ],
+    [
+     [
+      "6"
+     ],
+     0.1151874514563909,
+     "11,5%"
+    ],
+    [
+     [
+      "7"
+     ],
+     0.025308521034194554,
+     "2,5%"
+    ],
+    [
+     [
+      "8"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "lived_abroad": {
+   "id": "q1_fixture03livedabr",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.7047255456580847,
+     "70,5%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.2952744543419154,
+     "29,5%"
+    ]
+   ]
+  },
+  "literate": {
+   "id": "q1_fixture04literate",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.7154547267479902,
+     "71,5%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.28454527325200973,
+     "28,5%"
+    ]
+   ]
+  },
+  "sitprof": {
+   "id": "q1_fixture05sitprof",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.5922094039860242,
+     "59,2%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.1960925954234323,
+     "19,6%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.09619849669789665,
+     "9,6%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.11549950389264686,
+     "11,5%"
+    ],
+    [
+     [
+      "5"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "occupation": {
+   "id": "q1_fixture06occupati",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "0"
+     ],
+     0.332888356140726,
+     "33,3%"
+    ],
+    [
+     [
+      "1"
+     ],
+     0.010024013913837289,
+     "1,0%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.15089834363332913,
+     "15,1%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.08392705380189895,
+     "8,4%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.015003194641971054,
+     "1,5%"
+    ],
+    [
+     [
+      "5"
+     ],
+     0.16278842332098215,
+     "16,3%"
+    ],
+    [
+     [
+      "6"
+     ],
+     0.1561225944568537,
+     "15,6%"
+    ],
+    [
+     [
+      "7"
+     ],
+     0.018556950369914275,
+     "1,9%"
+    ],
+    [
+     [
+      "8"
+     ],
+     0.0697910697204875,
+     "7,0%"
+    ],
+    [
+     [
+      "9"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "industry": {
+   "id": "q1_fixture07industry",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "A"
+     ],
+     0.18416585518167214,
+     "18,4%"
+    ],
+    [
+     [
+      "B"
+     ],
+     0.04949112021905419,
+     "4,9%"
+    ],
+    [
+     [
+      "C"
+     ],
+     0.013022716101963146,
+     "1,3%"
+    ],
+    [
+     [
+      "D"
+     ],
+     0.055494426490119396,
+     "5,5%"
+    ],
+    [
+     [
+      "E"
+     ],
+     0.004089669684888338,
+     "0,4%"
+    ],
+    [
+     [
+      "F"
+     ],
+     0.013635128608876097,
+     "1,4%"
+    ],
+    [
+     [
+      "G"
+     ],
+     0.06496043738285778,
+     "6,5%"
+    ],
+    [
+     [
+      "H"
+     ],
+     0.03189646289764005,
+     "3,2%"
+    ],
+    [
+     [
+      "I"
+     ],
+     0.033355549611091044,
+     "3,3%"
+    ],
+    [
+     [
+      "J"
+     ],
+     0.04746186949037607,
+     "4,7%"
+    ],
+    [
+     [
+      "K"
+     ],
+     0.03796881575354289,
+     "3,8%"
+    ],
+    [
+     [
+      "L"
+     ],
+     0.03062724948025184,
+     "3,1%"
+    ],
+    [
+     [
+      "M"
+     ],
+     0.0024285081403523927,
+     "0,2%"
+    ],
+    [
+     [
+      "N"
+     ],
+     0.05784318180228793,
+     "5,8%"
+    ],
+    [
+     [
+      "O"
+     ],
+     0.07704638148155626,
+     "7,7%"
+    ],
+    [
+     [
+      "P"
+     ],
+     0.07775076957065659,
+     "7,8%"
+    ],
+    [
+     [
+      "Q"
+     ],
+     0.052847386921212124,
+     "5,3%"
+    ],
+    [
+     [
+      "R"
+     ],
+     0.028378578173560536,
+     "2,8%"
+    ],
+    [
+     [
+      "S_94_96"
+     ],
+     0.028918791082301897,
+     "2,9%"
+    ],
+    [
+     [
+      "S_95"
+     ],
+     0.05495925788916929,
+     "5,5%"
+    ],
+    [
+     [
+      "T"
+     ],
+     0.05365784403657003,
+     "5,4%"
+    ],
+    [
+     [
+      "U"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "work_place": {
+   "id": "q1_fixture08workplac",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.505676812535596,
+     "50,6%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.0822040132496492,
+     "8,2%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.11569632301385038,
+     "11,6%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.1832919088603578,
+     "18,3%"
+    ],
+    [
+     [
+      "5"
+     ],
+     0.11313094234054655,
+     "11,3%"
+    ],
+    [
+     [
+      "6"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "transport": {
+   "id": "q1_fixture09transpor",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "01"
+     ],
+     0.3971070997721121,
+     "39,7%"
+    ],
+    [
+     [
+      "02"
+     ],
+     0.06051842853594667,
+     "6,1%"
+    ],
+    [
+     [
+      "03"
+     ],
+     0.07301774206388474,
+     "7,3%"
+    ],
+    [
+     [
+      "04"
+     ],
+     0.03125681393159118,
+     "3,1%"
+    ],
+    [
+     [
+      "05"
+     ],
+     0.06010883461705951,
+     "6,0%"
+    ],
+    [
+     [
+      "06"
+     ],
+     0.0546223551655967,
+     "5,5%"
+    ],
+    [
+     [
+      "07"
+     ],
+     0.10860124143197245,
+     "10,9%"
+    ],
+    [
+     [
+      "08"
+     ],
+     0.014436650396390685,
+     "1,4%"
+    ],
+    [
+     [
+      "09"
+     ],
+     0.07737548348678865,
+     "7,7%"
+    ],
+    [
+     [
+      "10"
+     ],
+     0.025049791933200064,
+     "2,5%"
+    ],
+    [
+     [
+      "11"
+     ],
+     0.09790555866545732,
+     "9,8%"
+    ],
+    [
+     [
+      "NR"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "tenure": {
+   "id": "q1_fixture10tenure",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.6988300181822199,
+     "69,9%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.10565219698786048,
+     "10,6%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.1955177848299196,
+     "19,6%"
+    ]
+   ]
+  },
+  "rooms": {
+   "id": "q1_fixture11rooms",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1_2"
+     ],
+     0.7544016902316626,
+     "75,4%"
+    ],
+    [
+     [
+      "3_4"
+     ],
+     0.16883924319641594,
+     "16,9%"
+    ],
+    [
+     [
+      "5+"
+     ],
+     0.07675906657192155,
+     "7,7%"
+    ]
+   ]
+  },
+  "building_period": {
+   "id": "q1_fixture12building",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "21"
+     ],
+     0.33561928026422955,
+     "33,6%"
+    ],
+    [
+     [
+      "22"
+     ],
+     0.07004827090898856,
+     "7,0%"
+    ],
+    [
+     [
+      "23"
+     ],
+     0.1410118498928937,
+     "14,1%"
+    ],
+    [
+     [
+      "24"
+     ],
+     0.0707486724459309,
+     "7,1%"
+    ],
+    [
+     [
+      "25"
+     ],
+     0.14059175894398918,
+     "14,1%"
+    ],
+    [
+     [
+      "26"
+     ],
+     0.0246450229206714,
+     "2,5%"
+    ],
+    [
+     [
+      "27"
+     ],
+     0.13593786085004134,
+     "13,6%"
+    ],
+    [
+     [
+      "28"
+     ],
+     0.05356516195109646,
+     "5,4%"
+    ],
+    [
+     [
+      "29"
+     ],
+     0.027832121822158867,
+     "2,8%"
+    ],
+    [
+     [
+      "30"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "accessibility": {
+   "id": "q1_fixture13accessib",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.9977132918273003,
+     "99,8%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.002286708172699734,
+     "0,2%"
+    ]
+   ]
+  },
+  "income": {
+   "id": "q1_fixture14income",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "0"
+     ],
+     0.21,
+     "21,0%"
+    ],
+    [
+     [
+      "1"
+     ],
+     0.18,
+     "18,0%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.2,
+     "20,0%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.12,
+     "12,0%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.13,
+     "13,0%"
+    ],
+    [
+     [
+      "5"
+     ],
+     0.11,
+     "11,0%"
+    ],
+    [
+     [
+      "6"
+     ],
+     0.05,
+     "5,0%"
+    ]
+   ]
+  },
+  "birthplace": {
+   "id": "q1_fixture15birthpla",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.5691929246845228,
+     "56,9%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.21380835932986111,
+     "21,4%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.21699871598561615,
+     "21,7%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "residence_2019": {
+   "id": "q1_fixture16residenc",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "2"
+     ],
+     0.4394898823533158,
+     "43,9%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.0700210814590737,
+     "7,0%"
+    ],
+    [
+     [
+      "4"
+     ],
+     0.17098356437885898,
+     "17,1%"
+    ],
+    [
+     [
+      "5"
+     ],
+     0.18065801675918972,
+     "18,1%"
+    ],
+    [
+     [
+      "6"
+     ],
+     0.13884745504956186,
+     "13,9%"
+    ],
+    [
+     [
+      "1"
+     ],
+     0.0,
+     "0,0%"
+    ]
+   ]
+  },
+  "school_attendance": {
+   "id": "q1_fixture17schoolat",
+   "decision": "publish",
+   "requested_tier": "A",
+   "resolved_tier": "A",
+   "reasons": [],
+   "cells": [
+    [
+     [
+      "1"
+     ],
+     0.695896093260346,
+     "69,6%"
+    ],
+    [
+     [
+      "2"
+     ],
+     0.13145295840893748,
+     "13,1%"
+    ],
+    [
+     [
+      "3"
+     ],
+     0.1726509483307165,
+     "17,3%"
+    ]
+   ]
+  }
+ }
+}

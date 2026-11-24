@@ -41,8 +41,6 @@ const pt = {
 
   choicesTitle: 'Qual destas é?',
   choicesLede: 'Escolhe a freguesia que achas que as pistas descrevem.',
-  choose: (name: string, municipality: string) => `Escolher ${name} (${municipality})`,
-  ruledOutName: (name: string, municipality: string) => `${name} (${municipality}): não é a freguesia misteriosa`,
   ruledOut: 'não é esta',
   nextClue: 'Ver a próxima pista',
   allClues: 'As seis pistas estão abertas. Escolhe entre as que restam.',
@@ -135,8 +133,6 @@ const en: Copy = {
 
   choicesTitle: 'Which one is it?',
   choicesLede: 'Pick the parish you think the clues describe.',
-  choose: (name: string, municipality: string) => `Pick ${name} (${municipality})`,
-  ruledOutName: (name: string, municipality: string) => `${name} (${municipality}): not the mystery parish`,
   ruledOut: 'not this one',
   nextClue: 'See the next clue',
   allClues: 'All six clues are open. Pick from the ones left.',

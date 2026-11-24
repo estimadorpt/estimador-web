@@ -22,6 +22,10 @@ import type {
 import { daysBetween } from '@/lib/football-format';
 
 export const INJURY_MAX_AGE_DAYS = 7;
+/** A list read off each club's last game (SofaScore, `basis: "last_game"`) is
+ * as old as that game: two weeks covers an international break, and a club
+ * whose last game is older than that is left out. */
+export const LAST_GAME_MAX_AGE_DAYS = 15;
 
 export type AbsencesStatus = 'current' | 'stale' | 'missing';
 
@@ -51,16 +55,27 @@ export function currentAbsences(
   });
 
   if (injuries.stale === true || !snapshotDate) return none('stale');
+  const lastGame = injuries.basis === 'last_game';
+  const maxAge = lastGame ? LAST_GAME_MAX_AGE_DAYS : INJURY_MAX_AGE_DAYS;
   if (predictionTimestamp) {
     const age = daysBetween(snapshotDate, predictionTimestamp);
-    if (age === null || age > INJURY_MAX_AGE_DAYS) return none('stale');
+    if (age === null || age > maxAge) return none('stale');
   }
+  const recentTeam = (team: InjuryTeam) => {
+    if (!lastGame || !predictionTimestamp) return true;
+    if (!team.as_of) return false;
+    const age = daysBetween(team.as_of, predictionTimestamp);
+    return age !== null && age <= maxAge;
+  };
+  const recentTeams = new Set((injuries.teams ?? []).filter(recentTeam).map(t => t.team));
 
   // Expected returns are calendar dates; compare them as dates.
   const forecastDay = predictionTimestamp ? dateOnly(predictionTimestamp) : '';
   const cutoff = forecastDay > snapshotDate ? forecastDay : snapshotDate;
   const players = (injuries.players ?? []).filter(
-    p => !p.expected_return || dateOnly(p.expected_return) >= cutoff,
+    p =>
+      (!lastGame || recentTeams.has(p.team)) &&
+      (!p.expected_return || dateOnly(p.expected_return) >= cutoff),
   );
 
   const teams = (injuries.teams ?? [])

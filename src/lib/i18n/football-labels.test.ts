@@ -1,13 +1,15 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { injuryReasonLabel, injuryReasonPt } from './football-labels';
+import { composeInjuryReasonPt, injuryReasonLabel, injuryReasonPt, positionLabel } from './football-labels';
 
-// Every injury reason in a published injuries.json must have a Portuguese
-// label, or a Portuguese match page prints Transfermarkt's English (audit F6:
+// A Portuguese page must never print Transfermarkt's English (audit F6:
 // "Torn lateral knee ligament" on /pt/desporto/liga/jogo/rio-ave-nacional/).
-// Part of `npm run check`, so a data sync that brings a new reason fails CI
-// until the label is added here.
+// It also must not fail the build when the unattended data sync brings a
+// reason nobody has labelled yet: on 17 Oct 2026 that turned main red and
+// stopped every deploy. So a new reason gets a composed or generic
+// Portuguese label, and this test only lists it (console warning) so a
+// precise label can be added to `injuryReasonPt` at leisure.
 
 const FOOTBALL = path.join(process.cwd(), 'public/data/football');
 
@@ -36,9 +38,32 @@ function publishedReasons(): Map<string, string> {
 }
 
 describe('injury reason labels', () => {
-  it('cover every reason in the published injury snapshots', () => {
-    const missing = [...publishedReasons()].filter(([reason]) => !(reason in injuryReasonPt));
-    expect(missing.map(([reason, season]) => `${reason} (${season})`)).toEqual([]);
+  it('give every published reason a Portuguese label, and list the ones without an exact entry', () => {
+    const reasons = [...publishedReasons()];
+    for (const [reason] of reasons) {
+      expect(injuryReasonLabel(reason, 'pt')).not.toBe(reason);
+    }
+    const unlabelled = reasons.filter(([reason]) => !(reason in injuryReasonPt));
+    if (unlabelled.length) {
+      console.warn(
+        `Injury reasons without an exact Portuguese label (shown as "${unlabelled
+          .map(([r]) => `${r} → ${injuryReasonLabel(r, 'pt')}`)
+          .join('", "')}"); add them to injuryReasonPt.`,
+      );
+    }
+  });
+
+  it('never print English on a Portuguese page, whatever Transfermarkt sends next', () => {
+    expect(injuryReasonLabel('Wrist injury', 'pt')).toBe('Lesão no pulso');
+    expect(injuryReasonLabel('Broken collarbone', 'pt')).toBe('Fratura da clavícula');
+    expect(injuryReasonLabel('Torn calf muscle', 'pt')).toBe('Rotura do músculo da barriga da perna');
+    expect(injuryReasonLabel('Groin strain', 'pt')).toBe('Distensão na virilha');
+    expect(injuryReasonLabel('Rib fracture', 'pt')).toBe('Fratura da costela');
+    expect(injuryReasonLabel('Torn knee ligaments', 'pt')).toBe('Rotura dos ligamentos do joelho');
+    expect(injuryReasonLabel('Corona virus', 'pt')).toBe('Indisponível');
+    expect(injuryReasonLabel('Mystery', 'pt', 'injury')).toBe('Indisponível');
+    expect(injuryReasonLabel('Match ban', 'pt', 'suspension')).toBe('Suspensão');
+    expect(composeInjuryReasonPt('Mystery problem in the spleen')).toBeNull();
   });
 
   it('translate the reasons that reached the site untranslated', () => {
@@ -49,7 +74,29 @@ describe('injury reason labels', () => {
 
   it('keep English on English pages and fall back to the raw value', () => {
     expect(injuryReasonLabel('Broken ankle', 'en')).toBe('Broken ankle');
-    expect(injuryReasonLabel('Something new', 'pt')).toBe('Something new');
+    expect(injuryReasonLabel('Something new', 'en')).toBe('Something new');
     expect(injuryReasonLabel(null, 'pt')).toBe('');
+  });
+});
+
+describe('SofaScore reasons and positions (19 Nov 2026)', () => {
+  it.each([
+    ['Red card suspension', 'Castigo por expulsão'],
+    ['Yellow card accumulation', 'Acumulação de amarelos'],
+    ['Card suspension', 'Castigo por cartões'],
+    ['Disciplinary suspension', 'Castigo disciplinar'],
+    ['Physical discomfort', 'Desconforto físico'],
+    ['Broken leg', 'Fratura da perna'],
+  ])('labels %s', (reason, pt) => {
+    expect(injuryReasonLabel(reason, 'pt')).toBe(pt);
+  });
+
+  it.each([
+    ['Goalkeeper', 'Guarda-redes'],
+    ['Defender', 'Defesa'],
+    ['Midfielder', 'Médio'],
+    ['Forward', 'Avançado'],
+  ])('labels the position %s', (position, pt) => {
+    expect(positionLabel(position, 'pt')).toBe(pt);
   });
 });

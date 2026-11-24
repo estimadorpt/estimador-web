@@ -200,7 +200,7 @@ export default async function PlayerPage({
           data={data}
           locale={locale}
           injury={injury}
-          injuryReason={injuryReasonLabel(injury?.reason ?? null, locale)}
+          injuryReason={injuryReasonLabel(injury?.reason ?? null, locale, injury?.kind)}
           positionRating={resolvePositionRating(player, { gk, def, contrib })}
         />
 

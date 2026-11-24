@@ -25,7 +25,8 @@ import { HONESTY, RECIPE_COPY, TIER_COPY, tierMeaningFor, type Locale, type Wors
 import { breadcrumbJsonLd, jsonLd } from '@/lib/structured-data';
 import { indexPlaces, NEARBY_KEY, normaliseParishCode, regionSlug, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import { shareCardModel } from '@/lib/population/share-card';
-import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
+import type { ParishRecord, PopulationMeta } from '@/types/population';
+import { parishGroups } from './groups';
 import { formatDay } from '../quality/copy';
 import { GuessFirstCard } from './GuessFirst';
 import { howToReadItems, type HowToReadInput } from './how-to-read';
@@ -57,11 +58,6 @@ type State =
   | { kind: 'error'; code: string }
   | { kind: 'ready'; code: string; place: PagePlace; record: ParishRecord; meta: PopulationMeta; target: string | null; nearby: boolean };
 
-/** People questions first, then homes; each group keeps the producer's order. */
-const GROUPS: Array<{ id: string; title: Record<Locale, string>; recipes: PortraitRecipe[] }> = [
-  { id: 'pessoas', title: { pt: 'Pessoas', en: 'People' }, recipes: ['elders_alone', 'who_lives_alone', 'age', 'employment', 'education'] },
-  { id: 'casas', title: { pt: 'Casas e famílias', en: 'Homes and families' }, recipes: ['multigenerational', 'household_size', 'household_type'] },
-];
 
 const EYEBROW: Record<Locale, string> = { pt: 'População sintética · Censos 2021', en: 'Synthetic population · 2021 Census' };
 
@@ -370,7 +366,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 
   const regionHref = POPULATION_ROUTES.region(regionSlug(place.regionName));
   const order = meta.recipe_order;
-  const groups = GROUPS.map(group => ({ ...group, recipes: order.filter(recipe => group.recipes.includes(recipe)) }));
+  const groups = parishGroups(order, record, meta.recipes);
 
   // INE's count and the worst table too: the page then never says "500 residentes" and "menos de 500" at once (160707), and a tier C parish of 500 or more names what set its tier (MR2-03).
   const tierMeaning = tierMeaningFor(place.tier, place.publicationPopulation, place.censusPopulation, place.worst)[locale];
@@ -549,8 +545,10 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                 <h2 id={group.id} data-rail className="text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">
                   {group.title[locale]}
                 </h2>
+                {group.lede && <p className="-mt-2 max-w-3xl leading-relaxed text-graphite">{group.lede[locale]}</p>}
                 {group.recipes.map(recipe => {
-                  const response = record.responses[recipe];
+                  // parishGroups keeps only the questions this record answers, so the response is there.
+                  const response = record.responses[recipe]!;
                   const scope: Scope = response.decision === 'fallback'
                     ? { name: fallbackName ?? place.municipalityName, municipality: true }
                     : parishScope;

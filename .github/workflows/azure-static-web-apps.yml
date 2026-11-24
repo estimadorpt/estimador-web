@@ -14,6 +14,10 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    # A healthy run takes about eight minutes. Without a limit a step that
+    # waits on a host that never answers holds the run for hours, and the
+    # freshness check waits for the run to end.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,6 +44,18 @@ jobs:
       - name: Required data, types, lint and tests
         run: npm run check
 
+      # `/data/population/v*` is served immutable for a year, so a release the
+      # site already serves must never change in place: readers who hold its
+      # files would keep the old ones, and no later deploy could reach them.
+      # This checks each release folder against its own manifest, and that
+      # manifest against the one the live site serves, and stops the run when
+      # either differs. A release that is not on the site yet passes, and so
+      # does a site that cannot be asked (the output says which): it never
+      # takes more than about a minute a folder.
+      - name: Published population releases are unchanged
+        timeout-minutes: 5
+        run: node scripts/check-published-data.mjs
+
       - name: Build application
         run: npm run build
         env:
@@ -49,8 +65,16 @@ jobs:
           # pages renders the feed link only and no email field.
           NEXT_PUBLIC_NEWSLETTER_ENDPOINT: ${{ secrets.NEWSLETTER_ENDPOINT }}
 
+      # On a pull request this uploads a preview. The Free plan holds three
+      # staging environments, and every open pull request keeps one until it
+      # closes, so the upload is often refused ("maximum number of staging
+      # environments"). The checks above are what a pull request must pass;
+      # a refused preview is not a failed change, so on a pull request this
+      # step may fail without failing the run, and the next step says so.
+      # On main it must succeed: that upload is the deploy.
       - name: Build And Deploy
         id: builddeploy
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_DEPLOYMENT_TOKEN }}
@@ -62,12 +86,21 @@ jobs:
           # absent api_location deploys the static export alone.
           output_location: "out"
 
+      - name: Preview not uploaded
+        if: github.event_name == 'pull_request' && steps.builddeploy.outcome == 'failure'
+        run: |
+          echo "::warning title=No preview::The preview upload failed; the Build And Deploy log says why (usually all three staging environments are held by open pull requests). Data, types, lint, tests and the build passed."
+
       # A local preview does not apply staticwebapp.config.json. This asks the
       # deployed host for every exported route and asset, and fails the run if
       # one is missing, has the wrong content type, or if an unknown URL stops
-      # returning 404.
+      # returning 404. It takes seconds when the site is up. When the host gives
+      # no HTTP answer at all it stops within two minutes and says why (exit 3):
+      # on 18 November 2026 the domain's DNS stopped answering and runs sat here
+      # for up to 47 minutes.
       - name: Smoke check the deployed site
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        timeout-minutes: 10
         run: node scripts/smoke-check.mjs --base https://estimador.pt --sample 10
 
   close_pull_request_job:

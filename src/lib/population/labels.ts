@@ -11,7 +11,7 @@
  */
 import { POPULATION_RELEASE } from '@/lib/config/population';
 import { formatCount } from './format';
-import type { PortraitRecipe, QualityTier, ReasonCode } from '@/types/population';
+import type { LayerRecipe, PortraitRecipe, QualityTier, ReasonCode } from '@/types/population';
 
 export type Locale = 'pt' | 'en';
 type Text = Record<Locale, string>;
@@ -94,7 +94,190 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     },
     anchor: 'familias',
   },
+  // ---- v1.2 and its census-facts layer (docs/population/v1.2-parish-questions.md §2) ----
+  nationality: {
+    short: { pt: 'Nacionalidade', en: 'Nationality' },
+    population: {
+      pt: 'Todas as pessoas, pela nacionalidade: portuguesa ou estrangeira. Quem não tem nacionalidade nenhuma conta como estrangeiro.',
+      en: 'Everyone, by nationality: Portuguese or foreign. Stateless people count as foreign.',
+    },
+    anchor: 'nacionalidade',
+  },
+  marital: {
+    short: { pt: 'Estado civil', en: 'Marital status' },
+    population: {
+      pt: 'Pessoas com 12 ou mais anos, pelo estado civil legal. Quem vive em união de facto conta pelo seu estado civil legal.',
+      en: 'People aged 12 or over, by legal marital status. People in a de facto union count under their legal status.',
+    },
+    anchor: 'estado-civil',
+  },
+  income_source: {
+    short: { pt: 'Principal meio de vida', en: 'Main source of livelihood' },
+    population: {
+      pt: 'Pessoas com 15 ou mais anos, pela principal fonte do dinheiro com que vivem. É a fonte, não o valor do rendimento.',
+      en: 'People aged 15 or over, by the main source of the money they live on. It is the source, not the amount of income.',
+    },
+    anchor: 'meio-de-vida',
+  },
+  sitprof: {
+    short: { pt: 'Situação na profissão', en: 'Status in employment' },
+    population: {
+      pt: 'Pessoas empregadas, com 15 ou mais anos: por conta de outrem, por conta própria ou como empregadoras.',
+      en: 'Employed people aged 15 or over: employees, self-employed or employers.',
+    },
+    anchor: 'situacao-na-profissao',
+  },
+  occupation: {
+    short: { pt: 'Profissões', en: 'Occupations' },
+    population: {
+      pt: 'Pessoas empregadas, pelo grande grupo da profissão (Classificação Portuguesa das Profissões, 2010).',
+      en: 'Employed people, by major occupation group (Portuguese Classification of Occupations, 2010).',
+    },
+    anchor: 'profissoes',
+  },
+  industry: {
+    short: { pt: 'Atividade económica', en: 'Industry' },
+    population: {
+      pt: 'Pessoas empregadas, pela secção da atividade económica onde trabalham (CAE Rev. 3).',
+      en: 'Employed people, by the section of the industry they work in (CAE Rev. 3).',
+    },
+    anchor: 'atividade-economica',
+  },
+  work_place: {
+    short: { pt: 'Onde trabalham ou estudam', en: 'Where people work or study' },
+    population: {
+      pt: 'Pessoas empregadas e estudantes, pelo local onde trabalham ou estudam.',
+      en: 'Employed people and students, by where they work or study.',
+    },
+    anchor: 'local-de-trabalho',
+  },
+  transport: {
+    short: { pt: 'Como vão para o trabalho ou a escola', en: 'How people get to work or study' },
+    population: {
+      pt: 'Pessoas empregadas e estudantes que se deslocam para trabalhar ou estudar, pelo principal meio de transporte. Quem trabalha ou estuda em casa, ou sem local fixo, não entra nesta pergunta.',
+      en: 'Employed people and students who travel to work or study, by their main means of transport. People who work or study at home, or have no fixed place, are not part of this question.',
+    },
+    anchor: 'transporte',
+  },
+  tenure: {
+    short: { pt: 'Casa própria ou arrendada', en: 'Owned or rented homes' },
+    population: {
+      pt: 'Agregados privados que vivem num alojamento clássico de residência habitual, pelo regime de ocupação da casa. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
+      en: 'Private households living in a conventional dwelling that is their usual residence, by tenure. Care homes and other collective living quarters are not part of this question.',
+    },
+    anchor: 'casa-propria-ou-arrendada',
+  },
+  rooms: {
+    short: { pt: 'Divisões por casa', en: 'Rooms per home' },
+    population: {
+      pt: 'Agregados privados que vivem num alojamento clássico de residência habitual, pelo número de divisões da casa. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
+      en: 'Private households living in a conventional dwelling that is their usual residence, by the number of rooms. Care homes and other collective living quarters are not part of this question.',
+    },
+    anchor: 'divisoes',
+  },
+  building_period: {
+    short: { pt: 'Época de construção do edifício', en: 'When the building was built' },
+    population: {
+      pt: 'Agregados privados que vivem num alojamento clássico de residência habitual, pela época de construção do edifício. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
+      en: 'Private households living in a conventional dwelling that is their usual residence, by when the building was built. Care homes and other collective living quarters are not part of this question.',
+    },
+    anchor: 'epoca-de-construcao',
+  },
+  accessibility: {
+    short: { pt: 'Casas acessíveis em cadeira de rodas', en: 'Homes a wheelchair user can reach' },
+    population: {
+      pt: 'Agregados privados que vivem num alojamento clássico de residência habitual, por a casa ser ou não acessível a uma pessoa em cadeira de rodas. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
+      en: 'Private households living in a conventional dwelling that is their usual residence, by whether the home is accessible to a wheelchair user. Care homes and other collective living quarters are not part of this question.',
+    },
+    anchor: 'acessibilidade',
+  },
+  lived_abroad: {
+    short: { pt: 'Já viveram no estrangeiro', en: 'Have lived abroad' },
+    population: {
+      pt: 'Todas as pessoas: as que já viveram no estrangeiro durante um ano ou mais e as que não.',
+      en: 'Everyone: people who have lived abroad for a year or more, and people who have not.',
+    },
+    anchor: 'viveram-no-estrangeiro',
+    headline: { lived_abroad: '1' },
+  },
+  literate: {
+    short: { pt: 'Ler e escrever', en: 'Reading and writing' },
+    population: {
+      pt: 'Pessoas com 10 ou mais anos: as que sabem ler e escrever e as que não sabem.',
+      en: 'People aged 10 or over: those who can read and write, and those who cannot.',
+    },
+    anchor: 'ler-e-escrever',
+  },
+  // ---- Modelled, anchored at município level at most (contract §2e) ----
+  income: {
+    short: { pt: 'Rendimento bruto declarado', en: 'Gross declared income' },
+    population: {
+      pt: 'Pessoas com 18 ou mais anos em alojamentos familiares, pelo rendimento bruto que declararam no IRS de 2021 em nome próprio, em escalões. Quem não entregou declaração em nome próprio conta à parte: muitas dessas pessoas têm rendimento, só não declaram. Quem vive em alojamentos coletivos não entra.',
+      en: 'People aged 18 or over in private households, by the gross income they declared in their own name for 2021 income tax, in bands. Those who filed no return in their own name are counted apart: many of them have an income, they just do not file. Residents of collective quarters are not included.',
+    },
+    anchor: 'rendimento',
+  },
+  birthplace: {
+    short: { pt: 'Onde nasceram', en: 'Where people were born' },
+    population: {
+      pt: 'Todas as pessoas, pelo lugar onde nasceram: nesta freguesia, noutra freguesia do concelho, noutro concelho ou no estrangeiro.',
+      en: 'Everyone, by where they were born: in this parish, in another parish of the municipality, in another municipality, or abroad.',
+    },
+    anchor: 'onde-nasceram',
+  },
+  residence_2019: {
+    short: { pt: 'Onde viviam em 2019', en: 'Where people lived in 2019' },
+    population: {
+      pt: 'Todas as pessoas, pelo lugar onde viviam em 2019, dois anos antes dos Censos. Quem nasceu depois conta à parte.',
+      en: 'Everyone, by where they lived in 2019, two years before the Census. People born since then are counted apart.',
+    },
+    anchor: 'onde-viviam-em-2019',
+  },
+  school_attendance: {
+    short: { pt: 'Frequência de ensino', en: 'School attendance' },
+    population: {
+      pt: 'Todas as pessoas: as que estudavam em 2021, as que já estudaram e deixaram e as que nunca frequentaram a escola.',
+      en: 'Everyone: people studying in 2021, people who studied and stopped, and people who never attended school.',
+    },
+    anchor: 'frequencia-de-ensino',
+  },
 };
+
+/** The recipes v1.2 and its layers add (contract §2), in the order the page lists them. */
+export const LAYER_RECIPES = [
+  'nationality',
+  'marital',
+  'income_source',
+  'lived_abroad',
+  'literate',
+  'sitprof',
+  'occupation',
+  'industry',
+  'work_place',
+  'transport',
+  'tenure',
+  'rooms',
+  'building_period',
+  'accessibility',
+  'income',
+  'birthplace',
+  'residence_2019',
+  'school_attendance',
+] as const satisfies readonly LayerRecipe[];
+
+/**
+ * The modelled recipes: no parish table fixes them, so they sit apart, labelled
+ * (contract §2e). Income is anchored per município; residence in 2019 and
+ * school attendance by no table at any level; birthplace per parish on one
+ * share only. So the label says "modelled", and each source line says what,
+ * if anything, anchors it (MODELLED_ANCHOR).
+ */
+export const MODELLED_RECIPES: readonly LayerRecipe[] = ['income', 'birthplace', 'residence_2019', 'school_attendance'];
+
+/** A recipe name the site has copy for (a newer bundle may carry one it does not: that card is skipped, not guessed). */
+export function isPortraitRecipe(name: string): name is PortraitRecipe {
+  return Object.prototype.hasOwnProperty.call(RECIPE_COPY, name);
+}
 
 /** Dimension names, for table headers. */
 export const DIMENSION_LABEL: Record<string, Text> = {
@@ -106,6 +289,24 @@ export const DIMENSION_LABEL: Record<string, Text> = {
   education_level_coarse5: { pt: 'Escolaridade', en: 'Education' },
   hh_size_bin: { pt: 'Pessoas no agregado', en: 'People in the household' },
   hh_type_top: { pt: 'Núcleos familiares', en: 'Family nuclei' },
+  nationality_group: { pt: 'Nacionalidade', en: 'Nationality' },
+  marital_status_code: { pt: 'Estado civil', en: 'Marital status' },
+  income_source_code: { pt: 'Principal meio de vida', en: 'Main source of livelihood' },
+  sitprof_code: { pt: 'Situação na profissão', en: 'Status in employment' },
+  occupation_major: { pt: 'Grande grupo de profissões', en: 'Major occupation group' },
+  industry_section: { pt: 'Secção de atividade', en: 'Industry section' },
+  work_location_type: { pt: 'Local de trabalho ou estudo', en: 'Place of work or study' },
+  transport_mode: { pt: 'Meio de transporte', en: 'Means of transport' },
+  hh_tenure_code: { pt: 'Regime de ocupação', en: 'Tenure' },
+  hh_rooms_bin: { pt: 'Divisões', en: 'Rooms' },
+  building_period_code: { pt: 'Época de construção', en: 'Construction period' },
+  accessibility_code: { pt: 'Acesso em cadeira de rodas', en: 'Wheelchair access' },
+  lived_abroad: { pt: 'Viveram no estrangeiro', en: 'Lived abroad' },
+  literate: { pt: 'Ler e escrever', en: 'Reading and writing' },
+  income_band: { pt: 'Rendimento bruto anual', en: 'Gross yearly income' },
+  birthplace: { pt: 'Onde nasceram', en: 'Place of birth' },
+  residence_2019: { pt: 'Onde viviam em 2019', en: 'Residence in 2019' },
+  school_attendance: { pt: 'Frequência de ensino', en: 'School attendance' },
 };
 
 const AGE_BANDS = [
@@ -161,6 +362,156 @@ export const VALUES: Record<string, Array<{ value: string; label: Text }>> = {
     { value: '4', label: { pt: 'Três ou mais núcleos', en: 'Three or more nuclei' } },
   ],
   age_5y: AGE_BANDS.map(value => ({ value, label: ageLabel(value) })),
+  // ---- v1.2: codes from release.json label_maps (v1.0.3) and the census-facts layer ----
+  nationality_group: [
+    { value: 'PT', label: { pt: 'Portuguesa', en: 'Portuguese' } },
+    { value: 'Foreign', label: { pt: 'Estrangeira', en: 'Foreign' } },
+  ],
+  marital_status_code: [
+    { value: '1', label: { pt: 'Solteiras', en: 'Single' } },
+    { value: '2', label: { pt: 'Casadas', en: 'Married' } },
+    { value: '3', label: { pt: 'Viúvas', en: 'Widowed' } },
+    { value: '4', label: { pt: 'Divorciadas', en: 'Divorced' } },
+  ],
+  income_source_code: [
+    { value: '1', label: { pt: 'Trabalho', en: 'Work' } },
+    { value: '2', label: { pt: 'Reforma ou pensão', en: 'Retirement or other pension' } },
+    { value: '3', label: { pt: 'Subsídio de desemprego', en: 'Unemployment benefit' } },
+    { value: '4', label: { pt: 'Rendimento social de inserção', en: 'Social integration income (RSI)' } },
+    { value: '5', label: { pt: 'Outro subsídio temporário (doença, parentalidade…)', en: 'Other temporary benefit (sickness, parental…)' } },
+    { value: '6', label: { pt: 'Rendimentos de propriedade ou de empresa', en: 'Income from property or a business' } },
+    { value: '7', label: { pt: 'A cargo da família', en: 'Supported by the family' } },
+    { value: '8', label: { pt: 'Outra situação', en: 'Other' } },
+  ],
+  sitprof_code: [
+    { value: '1', label: { pt: 'Empregador, com menos de 10 empregados', en: 'Employer, under 10 employees' } },
+    { value: '2', label: { pt: 'Empregador, com 10 ou mais empregados', en: 'Employer, 10 or more employees' } },
+    { value: '3', label: { pt: 'Por conta própria, sem empregados', en: 'Self-employed, no employees' } },
+    { value: '4', label: { pt: 'Por conta de outrem', en: 'Employee' } },
+    { value: '5', label: { pt: 'Outra situação', en: 'Other' } },
+  ],
+  occupation_major: [
+    { value: '0', label: { pt: 'Forças armadas', en: 'Armed forces' } },
+    { value: '1', label: { pt: 'Dirigentes, diretores e gestores', en: 'Managers and directors' } },
+    { value: '2', label: { pt: 'Especialistas das atividades intelectuais e científicas', en: 'Professionals' } },
+    { value: '3', label: { pt: 'Técnicos e profissões de nível intermédio', en: 'Technicians and associate professionals' } },
+    { value: '4', label: { pt: 'Pessoal administrativo', en: 'Clerical support workers' } },
+    { value: '5', label: { pt: 'Serviços pessoais, proteção e segurança, vendas', en: 'Service and sales workers' } },
+    { value: '6', label: { pt: 'Agricultura, pesca e floresta (qualificados)', en: 'Skilled agricultural, forestry and fishery workers' } },
+    { value: '7', label: { pt: 'Indústria, construção e artífices (qualificados)', en: 'Craft and related trades workers' } },
+    { value: '8', label: { pt: 'Operadores de instalações e máquinas, montagem', en: 'Plant and machine operators and assemblers' } },
+    { value: '9', label: { pt: 'Trabalhadores não qualificados', en: 'Elementary occupations' } },
+  ],
+  industry_section: [
+    { value: 'A', label: { pt: 'Agricultura, floresta e pesca', en: 'Agriculture, forestry and fishing' } },
+    { value: 'B', label: { pt: 'Indústrias extrativas', en: 'Mining and quarrying' } },
+    { value: 'C', label: { pt: 'Indústrias transformadoras', en: 'Manufacturing' } },
+    { value: 'D', label: { pt: 'Eletricidade e gás', en: 'Electricity and gas' } },
+    { value: 'E', label: { pt: 'Água, saneamento e resíduos', en: 'Water, sewerage and waste' } },
+    { value: 'F', label: { pt: 'Construção', en: 'Construction' } },
+    { value: 'G', label: { pt: 'Comércio e reparação de veículos', en: 'Trade and vehicle repair' } },
+    { value: 'H', label: { pt: 'Transportes e armazenagem', en: 'Transport and storage' } },
+    { value: 'I', label: { pt: 'Alojamento e restauração', en: 'Accommodation and food services' } },
+    { value: 'J', label: { pt: 'Informação e comunicação', en: 'Information and communication' } },
+    { value: 'K', label: { pt: 'Atividades financeiras e de seguros', en: 'Finance and insurance' } },
+    { value: 'L', label: { pt: 'Atividades imobiliárias', en: 'Real estate' } },
+    { value: 'M', label: { pt: 'Consultoria, ciência e técnica', en: 'Professional, scientific and technical activities' } },
+    { value: 'N', label: { pt: 'Serviços administrativos e de apoio', en: 'Administrative and support services' } },
+    { value: 'O', label: { pt: 'Administração pública e defesa', en: 'Public administration and defence' } },
+    { value: 'P', label: { pt: 'Educação', en: 'Education' } },
+    { value: 'Q', label: { pt: 'Saúde e apoio social', en: 'Health and social work' } },
+    { value: 'R', label: { pt: 'Artes, espetáculos, desporto e recreio', en: 'Arts, entertainment and recreation' } },
+    { value: 'S_94_96', label: { pt: 'Outros serviços (associações, serviços pessoais)', en: 'Other services (associations, personal services)' } },
+    { value: 'S_95', label: { pt: 'Reparação de computadores e bens pessoais', en: 'Repair of computers and personal goods' } },
+    { value: 'T', label: { pt: 'Famílias empregadoras de pessoal doméstico', en: 'Households as employers of domestic staff' } },
+    { value: 'U', label: { pt: 'Organismos internacionais', en: 'International organisations' } },
+  ],
+  work_location_type: [
+    { value: '1', label: { pt: 'Em casa', en: 'At home' } },
+    { value: '2', label: { pt: 'Nesta freguesia', en: 'In this parish' } },
+    { value: '3', label: { pt: 'Noutra freguesia do concelho', en: 'In another parish of the municipality' } },
+    { value: '4', label: { pt: 'Noutro concelho', en: 'In another municipality' } },
+    { value: '5', label: { pt: 'No estrangeiro', en: 'Abroad' } },
+    { value: '6', label: { pt: 'Sem local fixo', en: 'No fixed place' } },
+  ],
+  transport_mode: [
+    { value: '01', label: { pt: 'A pé', en: 'On foot' } },
+    { value: '02', label: { pt: 'Automóvel, a conduzir', en: 'Car, driving' } },
+    { value: '03', label: { pt: 'Automóvel, como passageiro', en: 'Car, as a passenger' } },
+    { value: '04', label: { pt: 'Autocarro', en: 'Bus' } },
+    { value: '05', label: { pt: 'Transporte da empresa ou da escola', en: 'Company or school transport' } },
+    { value: '06', label: { pt: 'Metropolitano', en: 'Metro' } },
+    { value: '07', label: { pt: 'Comboio', en: 'Train' } },
+    { value: '08', label: { pt: 'Motociclo', en: 'Motorcycle' } },
+    { value: '09', label: { pt: 'Bicicleta', en: 'Bicycle' } },
+    { value: '10', label: { pt: 'Barco', en: 'Boat' } },
+    { value: '11', label: { pt: 'Outro', en: 'Other' } },
+    { value: 'NR', label: { pt: 'Não indicado', en: 'Not stated' } },
+  ],
+  hh_tenure_code: [
+    { value: '1', label: { pt: 'Casa própria', en: 'Owned' } },
+    { value: '3', label: { pt: 'Arrendada', en: 'Rented' } },
+    { value: '4', label: { pt: 'Outra situação', en: 'Other' } },
+  ],
+  hh_rooms_bin: [
+    { value: '1_2', label: { pt: '1 ou 2 divisões', en: '1 or 2 rooms' } },
+    { value: '3_4', label: { pt: '3 ou 4 divisões', en: '3 or 4 rooms' } },
+    { value: '5+', label: { pt: '5 ou mais divisões', en: '5 or more rooms' } },
+  ],
+  building_period_code: [
+    { value: '21', label: { pt: 'Antes de 1919', en: 'Before 1919' } },
+    { value: '22', label: { pt: '1919–1945', en: '1919–1945' } },
+    { value: '23', label: { pt: '1946–1960', en: '1946–1960' } },
+    { value: '24', label: { pt: '1961–1980', en: '1961–1980' } },
+    { value: '25', label: { pt: '1981–1990', en: '1981–1990' } },
+    { value: '26', label: { pt: '1991–2000', en: '1991–2000' } },
+    { value: '27', label: { pt: '2001–2005', en: '2001–2005' } },
+    { value: '28', label: { pt: '2006–2010', en: '2006–2010' } },
+    { value: '29', label: { pt: '2011–2015', en: '2011–2015' } },
+    { value: '30', label: { pt: '2016–2021', en: '2016–2021' } },
+  ],
+  accessibility_code: [
+    { value: '1', label: { pt: 'Acessível em cadeira de rodas', en: 'Accessible to a wheelchair user' } },
+    { value: '2', label: { pt: 'Não acessível', en: 'Not accessible' } },
+  ],
+  lived_abroad: [
+    { value: '1', label: { pt: 'Viveram no estrangeiro um ano ou mais', en: 'Lived abroad for a year or more' } },
+    { value: '2', label: { pt: 'Não', en: 'No' } },
+  ],
+  literate: [
+    { value: '1', label: { pt: 'Sabem ler e escrever', en: 'Can read and write' } },
+    { value: '2', label: { pt: 'Não sabem ler nem escrever', en: 'Cannot read or write' } },
+  ],
+  // income_band: INE's bracket edges, the ones the model holds per município (half-open:
+  // exactly 5 000 € is in the second band). Code 0 is "filed no return", never "no income".
+  income_band: [
+    { value: '0', label: { pt: 'Não entregou IRS em nome próprio', en: 'Filed no return in their own name' } },
+    { value: '1', label: { pt: 'Menos de 5 000 €', en: 'Under €5,000' } },
+    { value: '2', label: { pt: '5 000 a 10 000 €', en: '€5,000 to €10,000' } },
+    { value: '3', label: { pt: '10 000 a 13 500 €', en: '€10,000 to €13,500' } },
+    { value: '4', label: { pt: '13 500 a 19 000 €', en: '€13,500 to €19,000' } },
+    { value: '5', label: { pt: '19 000 a 32 500 €', en: '€19,000 to €32,500' } },
+    { value: '6', label: { pt: '32 500 € ou mais', en: '€32,500 or more' } },
+  ],
+  birthplace: [
+    { value: '1', label: { pt: 'Nesta freguesia', en: 'In this parish' } },
+    { value: '2', label: { pt: 'Noutra freguesia do concelho', en: 'In another parish of the municipality' } },
+    { value: '3', label: { pt: 'Noutro concelho', en: 'In another municipality' } },
+    { value: '4', label: { pt: 'No estrangeiro', en: 'Abroad' } },
+  ],
+  residence_2019: [
+    { value: '2', label: { pt: 'Na mesma casa', en: 'In the same home' } },
+    { value: '3', label: { pt: 'Noutra casa da freguesia', en: 'In another home in the parish' } },
+    { value: '4', label: { pt: 'Noutra freguesia do concelho', en: 'In another parish of the municipality' } },
+    { value: '5', label: { pt: 'Noutro concelho', en: 'In another municipality' } },
+    { value: '6', label: { pt: 'No estrangeiro', en: 'Abroad' } },
+    { value: '1', label: { pt: 'Ainda não tinham nascido', en: 'Not yet born' } },
+  ],
+  school_attendance: [
+    { value: '1', label: { pt: 'Estudavam', en: 'Studying' } },
+    { value: '2', label: { pt: 'Já estudaram', en: 'Studied, no longer' } },
+    { value: '3', label: { pt: 'Nunca frequentaram', en: 'Never attended' } },
+  ],
 };
 
 export function valueLabel(dimension: string, value: string, locale: Locale): string {
@@ -421,13 +772,20 @@ export const REASON_COPY: Record<ReasonCode, Text> = {
 };
 
 /**
- * How a card's figures were made, in the one vocabulary the methodology uses:
- * five questions group a field whose INE table is among those the population
- * was fitted to; three are derived from the generated population by a fixed
- * rule (living alone = a household of one person; a child and someone 65+ in
- * the same household; age bands), so no table in the fit checks them.
+ * How a card's figures were made, in the one vocabulary the methodology uses.
+ * `fitted`: the field's INE table is among those the population was fitted to,
+ * parish by parish (the five core ones and, from v1.2, people's nationality,
+ * marital status and source of livelihood, the work tables §64 fits after the
+ * household choice, and the four home tables bound since v1.1). `tilted`: a
+ * census-facts layer column, drawn for each person by a model of the Census
+ * public-use sample and tilted per parish to an INE table. `derived`: built
+ * from the generated population by a fixed rule (living alone = a household of
+ * one person; a child and someone 65+ in the same household; age bands), so no
+ * table checks it.
  */
-export const RECIPE_PROVENANCE: Record<PortraitRecipe, 'fitted' | 'derived'> = {
+export type RecipeProvenance = 'fitted' | 'tilted' | 'modelled' | 'derived';
+
+export const RECIPE_PROVENANCE: Record<PortraitRecipe, RecipeProvenance> = {
   age: 'fitted',
   education: 'fitted',
   employment: 'fitted',
@@ -436,6 +794,66 @@ export const RECIPE_PROVENANCE: Record<PortraitRecipe, 'fitted' | 'derived'> = {
   elders_alone: 'derived',
   multigenerational: 'derived',
   who_lives_alone: 'derived',
+  nationality: 'fitted',
+  marital: 'fitted',
+  income_source: 'fitted',
+  sitprof: 'fitted',
+  occupation: 'fitted',
+  industry: 'fitted',
+  work_place: 'fitted',
+  transport: 'fitted',
+  tenure: 'fitted',
+  rooms: 'fitted',
+  building_period: 'fitted',
+  accessibility: 'fitted',
+  lived_abroad: 'tilted',
+  literate: 'tilted',
+  income: 'modelled',
+  birthplace: 'modelled',
+  residence_2019: 'modelled',
+  school_attendance: 'modelled',
+};
+
+/**
+ * What anchors a modelled card, the part of its source line after the model:
+ * a município table, a parish table that fixes only part of it, or nothing.
+ * The census thread's per-attribute table (doc 240 §7) is the source.
+ */
+export const MODELLED_ANCHOR: Partial<Record<PortraitRecipe, Text>> = {
+  income: {
+    pt: 'ancorado às declarações de IRS de 2021 por concelho (INE) e às pensões da Segurança Social; a repartição pela freguesia é do modelo',
+    en: 'anchored to the 2021 income tax returns by municipality (INE) and to Social Security pensions; the split by parish is the model’s',
+  },
+  birthplace: {
+    pt: 'o quadro 12296 do INE fixa, por freguesia, os portugueses nascidos no estrangeiro; o resto da repartição é do modelo',
+    en: 'INE table 12296 fixes, per parish, Portuguese nationals born abroad; the rest of the split is the model’s',
+  },
+  residence_2019: {
+    pt: 'nenhum quadro do INE a fixa, de freguesia ou de concelho; o quadro 12312 serve só de verificação',
+    en: 'no INE table fixes it, for the parish or the municipality; table 12312 serves only as a check',
+  },
+  school_attendance: {
+    pt: 'nenhum quadro do INE a fixa, de freguesia ou de concelho; segue a idade e a escolaridade de cada pessoa',
+    en: 'no INE table fixes it, for the parish or the municipality; it follows each person’s age and education',
+  },
+};
+
+/**
+ * The INE table that fixes a layer question in each parish, named on its
+ * source line (contract §2); the Portuguese carries its contraction ("ao
+ * quadro", "à BGRI"). The core recipes keep the generic wording they
+ * have carried since v1.0.0.
+ */
+export const RECIPE_TABLE: Partial<Record<PortraitRecipe, Text>> = {
+  occupation: { pt: 'ao quadro 12306 do INE', en: 'INE table 12306' },
+  industry: { pt: 'ao quadro 12370 do INE', en: 'INE table 12370' },
+  work_place: { pt: 'ao quadro 12369 do INE', en: 'INE table 12369' },
+  transport: { pt: 'ao quadro 12371 do INE', en: 'INE table 12371' },
+  tenure: { pt: 'ao quadro 12498 do INE', en: 'INE table 12498' },
+  building_period: { pt: 'ao quadro 11541 do INE', en: 'INE table 11541' },
+  accessibility: { pt: 'à BGRI 2021 do INE', en: 'INE’s BGRI 2021' },
+  lived_abroad: { pt: 'ao quadro 12297 do INE', en: 'INE table 12297' },
+  literate: { pt: 'ao quadro 12274 do INE', en: 'INE table 12274' },
 };
 
 /**
@@ -458,7 +876,10 @@ export const RECIPE_CAVEAT: Partial<Record<PortraitRecipe, Text>> = {
  * Person questions whose field, for residents of collective living quarters,
  * was assigned after the fit (education imputed from similar records,
  * employment status filled in): the source line says so, since "fitted" is
- * not true of those rows (POP3-ACC-V02).
+ * not true of those rows (POP3-ACC-V02, INSTITUTIONAL_RECORDS). v1.2 writes
+ * those residents inside the generator (DECISIONS §65, C2), so the layer
+ * questions, which only v1.2 answers, are not listed, and at the v1.2 bump
+ * this list empties (contract, runbook).
  */
 const INSTITUTIONAL_AFTER_FIT: readonly PortraitRecipe[] = ['education', 'employment'];
 
@@ -468,7 +889,8 @@ const INSTITUTIONAL_AFTER_FIT: readonly PortraitRecipe[] = ['education', 'employ
  * parish card passes `withCaveat: false` and sets the caveat apart as a note.
  */
 export function sourceLine(recipe: PortraitRecipe, locale: Locale, { withCaveat = true }: { withCaveat?: boolean } = {}): string {
-  const derived = RECIPE_PROVENANCE[recipe] === 'derived';
+  const provenance = RECIPE_PROVENANCE[recipe];
+  const table = RECIPE_TABLE[recipe]?.[locale];
   const institutional = INSTITUTIONAL_AFTER_FIT.includes(recipe)
     ? (locale === 'pt'
       ? '; quem vive em alojamentos coletivos entra com valores atribuídos depois do ajuste'
@@ -476,12 +898,18 @@ export function sourceLine(recipe: PortraitRecipe, locale: Locale, { withCaveat 
     : '';
   const caveat = withCaveat && RECIPE_CAVEAT[recipe] ? `. ${RECIPE_CAVEAT[recipe]![locale]}` : '';
   if (locale === 'pt') {
-    return derived
-      ? `População sintética v${POPULATION_RELEASE} · derivada da população gerada a partir dos Censos 2021 (INE); não é uma das tabelas usadas no ajuste${caveat}`
+    if (provenance === 'derived') return `População sintética v${POPULATION_RELEASE} · derivada da população gerada a partir dos Censos 2021 (INE); não é uma das tabelas usadas no ajuste${caveat}`;
+    if (provenance === 'modelled') return `População sintética v${POPULATION_RELEASE} · modelado: atribuído a cada pessoa por um modelo${recipe === 'income' ? '' : ' da amostra de microdados dos Censos 2021'}; ${MODELLED_ANCHOR[recipe]?.pt ?? 'nenhum quadro de freguesia o fixa'}; média de cinco sorteios${caveat}`;
+    if (provenance === 'tilted') return `População sintética v${POPULATION_RELEASE}, factos dos Censos · atribuídos a cada pessoa por um modelo da amostra de microdados dos Censos 2021 e ajustados, freguesia a freguesia, ${table ?? 'ao quadro do INE'}; média de cinco sorteios${caveat}`;
+    return table
+      ? `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado, freguesia a freguesia, ${table} (Censos 2021)${institutional}${caveat}`
       : `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado às tabelas dos Censos 2021 (INE)${institutional}${caveat}`;
   }
-  return derived
-    ? `Synthetic population v${POPULATION_RELEASE} · derived from the population generated from the 2021 Census (INE); not one of the tables it was fitted to${caveat}`
+  if (provenance === 'derived') return `Synthetic population v${POPULATION_RELEASE} · derived from the population generated from the 2021 Census (INE); not one of the tables it was fitted to${caveat}`;
+  if (provenance === 'modelled') return `Synthetic population v${POPULATION_RELEASE} · modelled: assigned to each person by a model${recipe === 'income' ? '' : ' of the 2021 Census public-use sample'}; ${MODELLED_ANCHOR[recipe]?.en ?? 'no parish table fixes it'}; mean of five draws${caveat}`;
+  if (provenance === 'tilted') return `Synthetic population v${POPULATION_RELEASE}, census facts · drawn for each person by a model of the 2021 Census public-use sample and tilted, parish by parish, to ${table ?? 'INE’s table'}; mean of five draws${caveat}`;
+  return table
+    ? `Synthetic population v${POPULATION_RELEASE} · groups of a field fitted, parish by parish, to ${table} (2021 Census)${institutional}${caveat}`
     : `Synthetic population v${POPULATION_RELEASE} · groups of a field fitted to the 2021 Census tables (INE)${institutional}${caveat}`;
 }
 
