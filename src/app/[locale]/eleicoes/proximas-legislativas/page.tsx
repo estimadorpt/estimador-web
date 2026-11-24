@@ -120,20 +120,9 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
     ? `${partyWithArticle(leader, locale)} elegia mais deputados do que qualquer outro partido em ${prob(mostSeats.outright[leader])} das simulações`
     : `${leader} would win more seats than any other party in ${prob(mostSeats.outright[leader])} of simulations`;
 
-  // The majority: the seat sum that reaches 116 most often, when it does in most draws.
-  const topSum = [...seatSums].sort((a, b) => b.reach - a.reach)[0];
-  const sumFinds = topSum && topSum.reach >= 0.5;
-  const noPartyAlone = seats.every(s => s.hi90 < majorityThreshold);
-  const sumsHeading = sumFinds
-    ? (pt
-      ? `${join(topSum.parties)} somam ${majorityThreshold} ou mais mandatos em ${prob(topSum.reach)} das simulações`
-      : `${join(topSum.parties)} reach ${majorityThreshold} seats or more in ${prob(topSum.reach)} of simulations`)
-    : (pt
-      ? `Nenhuma destas somas chega aos ${majorityThreshold} mandatos em metade das simulações`
-      : `None of these sums reaches ${majorityThreshold} seats in half of the simulations`);
   const lede = pt
-    ? `Se a votação fosse a ${lastPoll}, data da última sondagem.${sumFinds ? ` ${join(topSum.parties)} somariam ${majorityThreshold} ou mais mandatos em ${prob(topSum.reach)} das simulações${noPartyAlone ? '; nenhum partido chega lá sozinho' : ''}.` : ''}`
-    : `If the vote were held on ${lastPoll}, the day of the latest poll.${sumFinds ? ` ${join(topSum.parties)} would have ${majorityThreshold} seats or more in ${prob(topSum.reach)} of simulations${noPartyAlone ? '; no party gets there alone' : ''}.` : ''}`;
+    ? `Se a votação fosse a ${lastPoll}, dia da última sondagem.`
+    : `If the vote were held on ${lastPoll}, the day of the latest poll.`;
 
   // Votes: how far apart the leaders are, and whether their 90% intervals overlap.
   const [first] = national;
@@ -194,7 +183,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
   const pollParties = ['AD', 'PS', 'CH', 'IL', 'L', 'CDU', 'BE', 'PAN'];
   const diag = run.diagnostics;
   const methodLink = { methodologyHref: '#metodo', methodologyLabel: pt ? 'Como lemos as sondagens' : 'How we read the polls', locale };
-  const frame = { ...methodLink, updated: pt ? `Estimativa de ${shortDate(run.as_of)}` : `Estimate of ${shortDate(run.as_of)}` };
+  const frame = methodLink;
   const modelSource = pt
     ? `Fonte: modelo estimador.pt, ${count(file.polls.length)} sondagens até ${shortDate(run.last_poll)}`
     : `Source: estimador.pt model, ${count(file.polls.length)} polls up to ${shortDate(run.last_poll)}`;
@@ -223,15 +212,14 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
             <a href="#mandatos" className={`tap-target ${linkClass}`}>{pt ? 'Mandatos' : 'Seats'}</a>
             <a href="#tendencia" className={`tap-target ${linkClass}`}>{pt ? `Desde ${prevYear}` : `Since ${prevYear}`}</a>
             <a href="#distritos" className={`tap-target ${linkClass}`}>{pt ? 'Distritos' : 'Districts'}</a>
-            <a href="#sondagens" className={`tap-target ${linkClass}`}>{pt ? 'Sondagens' : 'Polls'}</a>
             <a href="#metodo" className={`tap-target ${linkClass}`}>{pt ? 'Método' : 'Method'}</a>
           </div>
         </nav>
 
         <section className="border-b border-line">
-          <div className="mx-auto grid max-w-7xl gap-x-12 gap-y-10 px-4 py-8 lg:grid-cols-2">
+          <div className="mx-auto max-w-7xl px-4 py-6">
             {/* Who has most seats: one ruler per party, the tie as its own row. */}
-            <div id="estimativa">
+            <div id="estimativa" className="max-w-xl">
               <h2 className="mb-3 text-xl text-ink">{pt ? 'Quem elege mais deputados' : 'Who wins most seats'}</h2>
               <table className="w-full border-collapse text-[14px]">
                 <caption className="sr-only">{pt ? 'Percentagem das simulações em que cada partido elege mais deputados do que qualquer outro.' : 'Share of simulations in which each party wins more seats than any other.'}</caption>
@@ -252,30 +240,6 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
               </table>
             </div>
 
-            {/* The majority, as seat arithmetic. */}
-            <div>
-              <h2 className="mb-3 text-xl text-ink">{sumsHeading}</h2>
-              <table className="w-full border-collapse text-[14px]">
-                <caption className="sr-only">{pt ? `Somas de mandatos: mediana e percentagem das simulações em que chegam aos ${majorityThreshold} (maioria de 230).` : `Seat sums: median and share of simulations reaching ${majorityThreshold} (a majority of 230).`}</caption>
-                <thead>
-                  <tr className={headRow}>
-                    <th scope="col" className={headCell}>{pt ? 'Partidos' : 'Parties'}</th>
-                    <th scope="col" className={`${headCell} text-right`}>{pt ? 'Mediana' : 'Median'}</th>
-                    <th scope="col" className="pb-1.5 text-right font-medium">{pt ? `${majorityThreshold} ou mais` : `${majorityThreshold} or more`}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {seatSums.map(sum => (
-                    <tr key={sum.parties.join('+')} className="border-b border-grid">
-                      <th scope="row" className="py-1.5 pr-2 text-left font-normal">{join(sum.parties)}</th>
-                      <td className="py-1.5 pr-2 text-right tabular-nums">{count(sum.median)}</td>
-                      <td className="py-1.5 text-right tabular-nums">{prob(sum.reach)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="mt-3 text-xs text-graphite">{t('forecast.coalitionArithmeticNote')}</p>
-            </div>
           </div>
         </section>
 
@@ -285,7 +249,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
               <h2 className={sectionTitleClass}>{votesHeading}</h2>
               <DataCard
                 title={pt ? `Votos ${ifVote}` : `Votes ${ifVote}`}
-                subtitle={pt ? `Mediana e intervalo de 90%; o quadrado é o resultado de ${prevYear}.` : `Median and 90% interval; the square is the ${prevYear} result.`}
+                subtitle={pt ? `Mediana e intervalo de 90%, sobre os votos nos oito partidos modelados; o quadrado é o resultado de ${prevYear}.` : `Median and 90% interval, out of the votes for the eight modelled parties; the square is the ${prevYear} result.`}
                 source={modelSource}
                 {...frame}
               >
@@ -326,11 +290,6 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                 </table>
                 <p className="mt-2 text-[12.5px] leading-[17px] text-graphite">
                   <ReadingRule locale={locale} variant="short" marks={['now', 'band']} />
-                </p>
-                <p className="mt-2 text-[12.5px] leading-[17px] text-graphite">
-                  {pt
-                    ? 'Percentagens dos votos nos oito partidos modelados, sem os outros partidos nem os brancos e nulos; as sondagens publicam percentagens sobre o seu próprio total.'
-                    : 'Shares of the vote for the eight modelled parties, without other parties or blank and spoilt ballots; the polls publish shares of their own total.'}
                 </p>
               </DataCard>
             </div>
@@ -376,6 +335,30 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                 {majorityThreshold <= seatMax && (
                   <p className="mt-1 text-[12.5px] leading-[17px] text-graphite">{pt ? `Tracejado: ${majorityThreshold} mandatos, a maioria.` : `Dashed: ${majorityThreshold} seats, a majority.`}</p>
                 )}
+                <Disclosure summary={pt ? 'Ver as somas de mandatos' : 'Show the seat sums'}>
+                  <div className="mt-2 max-w-xl">
+                  <table className="w-full border-collapse text-[14px]">
+                <caption className="sr-only">{pt ? `Somas de mandatos: mediana e percentagem das simulações em que chegam aos ${majorityThreshold} (maioria de 230).` : `Seat sums: median and share of simulations reaching ${majorityThreshold} (a majority of 230).`}</caption>
+                <thead>
+                  <tr className={headRow}>
+                    <th scope="col" className={headCell}>{pt ? 'Partidos' : 'Parties'}</th>
+                    <th scope="col" className={`${headCell} text-right`}>{pt ? 'Mediana' : 'Median'}</th>
+                    <th scope="col" className="pb-1.5 text-right font-medium">{pt ? `${majorityThreshold} ou mais` : `${majorityThreshold} or more`}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seatSums.map(sum => (
+                    <tr key={sum.parties.join('+')} className="border-b border-grid">
+                      <th scope="row" className="py-1.5 pr-2 text-left font-normal">{join(sum.parties)}</th>
+                      <td className="py-1.5 pr-2 text-right tabular-nums">{count(sum.median)}</td>
+                      <td className="py-1.5 text-right tabular-nums">{prob(sum.reach)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-3 text-xs text-graphite">{t('forecast.coalitionArithmeticNote')}</p>
+                  </div>
+                </Disclosure>
               </DataCard>
             </div>
 
@@ -389,7 +372,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                 source={modelSource}
                 {...frame}
               >
-                <PollingChart series={{ dates: trend.dates, parties: trend.parties }} voteShareLabel={t('forecast.voteShareLabel')} band={{ percent: Math.round(trend.interval * 100), hdi: false }} />
+                <PollingChart series={{ dates: trend.dates, parties: trend.parties }} voteShareLabel={t('forecast.voteShareLabel')} band={{ percent: Math.round(trend.interval * 100), hdi: false }} showNote={false} />
               </DataCard>
             </div>
 
@@ -417,37 +400,19 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
               </DataCard>
             </div>
 
-            <div id="sondagens">
-              <h2 className={sectionTitleClass}>{pt ? `${count(file.polls.length)} sondagens desde ${prevMonth}` : `${count(file.polls.length)} polls since ${prevMonth}`}</h2>
-              <DataCard
-                title={pt ? 'As sondagens que o modelo leu, da mais recente para a mais antiga' : 'The polls the model read, newest first'}
-                subtitle={pt
-                  ? 'Como publicadas por cada empresa, sobre o total da própria sondagem (outros partidos incluídos); as percentagens de cima são só dos oito partidos modelados.'
-                  : 'As each firm published them, out of the poll’s own total (other parties included); the shares above are of the eight modelled parties only.'}
-                source={pt ? 'Fonte: sondagens publicadas na comunicação social, compiladas pela Wikipedia' : 'Source: polls published in the press, as compiled by Wikipedia'}
-                {...methodLink}
-              >
-                <ChartTable
-                  caption={pt ? 'Sondagens desde as últimas legislativas' : 'Polls since the last parliamentary election'}
-                  summaryLabel={pt ? `Ver as ${count(file.polls.length)} sondagens` : `Show the ${count(file.polls.length)} polls`}
-                  columns={[pt ? 'Empresa' : 'Pollster', pt ? 'Fim do trabalho de campo' : 'Fieldwork end', pt ? 'Amostra' : 'Sample', ...pollParties]}
-                  align={['left', 'left', 'right', ...pollParties.map(() => 'right' as const)]}
-                  rows={file.polls.map(poll => [
-                    pollsterDisplayName(poll.pollster),
-                    formatElectionDate(poll.fieldwork_end, locale),
-                    poll.sample_size != null ? count(poll.sample_size) : '—',
-                    ...pollParties.map(p => (poll.shares[p] != null ? points(poll.shares[p]) : '—')),
-                  ])}
-                />
-              </DataCard>
-            </div>
           </div>
         </section>
 
         <section id="metodo" className="pb-8">
           <div className="mx-auto max-w-7xl px-4">
             <h2 className="mb-4 border-b border-ink pb-2 text-2xl text-ink">{pt ? 'Como lemos as sondagens' : 'How we read the polls'}</h2>
-            <div className="grid gap-6 text-sm text-graphite md:grid-cols-3">
+            <p className="max-w-3xl text-[15px] text-ink">
+              {pt
+                ? 'Uma média das sondagens que desconta o desvio próprio de cada empresa, mais um erro comum a todas do tamanho dos que vimos nas últimas seis legislativas. Corre de novo sempre que sai uma sondagem.'
+                : 'An average of the polls net of each firm’s own lean, plus an error shared by all of them as large as those of the last six parliamentary elections. It runs again whenever a poll comes out.'}
+            </p>
+            <Disclosure summary={pt ? 'Ver o método' : 'Show the method'} className="mt-2">
+            <div className="mt-2 grid gap-6 text-sm text-graphite md:grid-cols-3">
               <div>
                 <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Uma média com memória' : 'An average with memory'}</h3>
                 <p>
@@ -472,6 +437,26 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                     : `Each simulation starts from each district’s ${prevYear} result and follows the national change (half proportional, half uniform), with the noise measured in earlier elections, and applies the D’Hondt method. The four emigration seats follow the 2019, 2022, 2024 and 2025 results in those constituencies, a quarter of the simulations each. We publish an update only if the sampler converged on all ${count(diag.n_values)} values in the model (r-hat up to 1.01, effective sample of 400 or more). This one: highest r-hat ${formatElectionNumber(diag.max_rhat, locale, 3)}, lowest effective sample ${count(Math.floor(Math.min(diag.min_ess_bulk, diag.min_ess_tail)))}.`}
                 </p>
               </div>
+            </div>
+            </Disclosure>
+            <div id="sondagens" className="mt-2">
+              <ChartTable
+                caption={pt ? 'Sondagens desde as últimas legislativas' : 'Polls since the last parliamentary election'}
+                summaryLabel={pt ? `Ver as ${count(file.polls.length)} sondagens` : `Show the ${count(file.polls.length)} polls`}
+                columns={[pt ? 'Empresa' : 'Pollster', pt ? 'Fim do trabalho de campo' : 'Fieldwork end', pt ? 'Amostra' : 'Sample', ...pollParties]}
+                align={['left', 'left', 'right', ...pollParties.map(() => 'right' as const)]}
+                rows={file.polls.map(poll => [
+                  pollsterDisplayName(poll.pollster),
+                  formatElectionDate(poll.fieldwork_end, locale),
+                  poll.sample_size != null ? count(poll.sample_size) : '—',
+                  ...pollParties.map(p => (poll.shares[p] != null ? points(poll.shares[p]) : '—')),
+                ])}
+                />
+              <p className="mt-1 text-[12.5px] leading-[17px] text-graphite">
+                {pt
+                  ? 'Fonte: sondagens publicadas na comunicação social, compiladas pela Wikipedia. Percentagens como publicadas, sobre o total de cada sondagem.'
+                  : 'Source: polls published in the press, as compiled by Wikipedia. Shares as published, out of each poll’s own total.'}
+              </p>
             </div>
             <div className="mt-6 flex flex-wrap gap-x-6">
               <TextLink href="/eleicoes/metodologia" locale={locale}>{pt ? 'Como fizemos as previsões arquivadas' : 'How the archived forecasts were made'}</TextLink>
