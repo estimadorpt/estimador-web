@@ -17,6 +17,7 @@ import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
 import { POPULATION_PUBLISHED, POPULATION_ROUTES } from '@/lib/config/population'
 import { regionSlug } from '@/lib/population/places'
 import { COPY_REVISED, newestDate, sitemapDay } from '@/lib/sitemap-dates'
+import { NOWCAST_DIR } from '@/lib/legislative-nowcast'
 
 export const dynamic = 'force-static'
 
@@ -101,7 +102,7 @@ const validDay = (iso: unknown): Date | undefined =>
 /** The day the live legislative nowcast was made (nowcast.json → run.as_of), or undefined. */
 function nowcastDate(): Date | undefined {
   try {
-    const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/elections/legislative-nowcast/nowcast.json'), 'utf8'))
+    const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data', NOWCAST_DIR, 'nowcast.json'), 'utf8'))
     return validDay(data?.run?.as_of)
   } catch {
     return undefined
