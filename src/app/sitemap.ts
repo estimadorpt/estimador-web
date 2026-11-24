@@ -142,8 +142,8 @@ function contentDates({ liga, players }: { liga?: Date; players?: Date }): Recor
     '/desporto/liga/dados': newestDate(liga, fixtures, injuries, scorecard),
     '/desporto/liga/jogadores': players,
     '/desporto/liga/modelo': scorecard,
-    // /sobre lists every section's status (the forecast, the release).
-    '/sobre': newestDate(liga, population),
+    // /sobre lists every section's status (the forecast, the release, the nowcast).
+    '/sobre': newestDate(liga, population, nowcastDate()),
     '/populacao': population,
     '/populacao/misteriosa': population,
     '/populacao/qualidade': population,

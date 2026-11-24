@@ -9,7 +9,9 @@ import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
-import { loadEconomyDashboard } from '@/lib/utils/data-loader';
+import { loadEconomyDashboard, loadJsonData } from '@/lib/utils/data-loader';
+import { NOWCAST_DIR, nowcastProblems, type NowcastFile } from '@/lib/legislative-nowcast';
+import { formatElectionLongDate } from '@/lib/election-display';
 import { loadLigaPlayers, loadLigaSummary } from '@/lib/utils/football-data-loader';
 import { formatLongDate } from '@/lib/football-format';
 import { ECONOMY_PUBLISHED, economyState, type EconomyState } from '@/lib/config/economy-status';
@@ -90,6 +92,7 @@ function EstadoAtual({
   economyDateLabel,
   playerSeason,
   ligaLatest,
+  nowcastLatest,
   locale,
 }: {
   economyNow: EconomyState;
@@ -98,6 +101,8 @@ function EstadoAtual({
   playerSeason: string | null;
   /** The latest Liga forecast: the round it follows and when it was updated, or null. */
   ligaLatest: { matchday: number; updated: string } | null;
+  /** The live legislative nowcast's run day and last poll (formatted), or null. */
+  nowcastLatest: { estimate: string; lastPoll: string } | null;
   locale: string;
 }) {
   const pt = locale !== 'en';
@@ -143,6 +148,17 @@ function EstadoAtual({
         : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` Dedicated Bayesian models also rate the players, one per dimension; the finishing and attacking contribution models ${playerSeason}.` : ''}`,
       method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia da Liga Portugal' : 'Liga Portugal methodology' },
     },
+    ...(nowcastLatest ? [{
+      label: pt ? 'Próximas legislativas' : 'Next parliamentary election',
+      href: '/eleicoes/proximas-legislativas',
+      status: pt
+        ? `Em publicação contínua · estimativa de ${nowcastLatest.estimate}, com sondagens até ${nowcastLatest.lastPoll}.`
+        : `Published on a continuing basis · estimate of ${nowcastLatest.estimate}, with polls up to ${nowcastLatest.lastPoll}.`,
+      text: pt
+        ? 'Não há eleições marcadas: a estimativa lê as sondagens publicadas desde as legislativas de 2025 e diz o que dariam se a votação fosse no dia da última, em votos e em mandatos. Volta a correr sempre que sai uma sondagem nova.'
+        : 'No election has been called: the estimate reads the polls published since the 2025 election and says what they would give if the vote were held on the day of the latest, in votes and in seats. It runs again whenever a new poll comes out.',
+      method: { href: '/eleicoes/proximas-legislativas#metodo', label: pt ? 'Como lemos as sondagens' : 'How we read the polls' },
+    }] : []),
     {
       label: pt ? 'Eleições presidenciais 2026' : 'Presidential election 2026',
       href: '/eleicoes/presidenciais',
@@ -220,10 +236,15 @@ export default async function AboutPage({
   // The latest forecast's round and update date, as the Liga page's status line has them.
   const ligaUpdated = ligaSummary?.timestamp ? formatLongDate(ligaSummary.timestamp, locale) : '';
   const ligaLatest = ligaSummary && ligaUpdated ? { matchday: ligaSummary.matchday, updated: ligaUpdated } : null;
+  // The live nowcast's dates, from the file its page reads; no row when the file is missing or refused.
+  const nowcast = await loadJsonData<NowcastFile>('nowcast.json', NOWCAST_DIR).catch(() => null);
+  const nowcastLatest = nowcast && nowcastProblems(nowcast).length === 0
+    ? { estimate: formatElectionLongDate(nowcast.run.as_of, locale), lastPoll: formatElectionLongDate(nowcast.run.last_poll, locale) }
+    : null;
 
   const components = getMDXComponents({
     EstadoAtual: () => (
-      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} playerSeason={playerSeason} ligaLatest={ligaLatest} locale={locale} />
+      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} playerSeason={playerSeason} ligaLatest={ligaLatest} nowcastLatest={nowcastLatest} locale={locale} />
     ),
   });
 
