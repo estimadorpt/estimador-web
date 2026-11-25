@@ -35,6 +35,12 @@ interface PollingChartProps {
    * base (the live nowcast passes them; the archive has none).
    */
   polls?: ReadonlyArray<{ date: string; party: string; share: number }>;
+  /**
+   * What each line's end label prints: its last value (the default), or the
+   * party alone, for a page whose own figures for today differ from the
+   * average's last value (the nowcast's include the shared polling error).
+   */
+  endLabels?: "value" | "party";
 }
 
 /** One party's value on one date, as Plot reads it. */
@@ -60,7 +66,7 @@ const day = (iso: string) => new Date(`${iso}T12:00:00Z`);
  * each other near the floor, so their lines go without, and the table holds
  * every party with its band.
  */
-export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true }, showNote = true, polls }: PollingChartProps) {
+export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true }, showNote = true, polls, endLabels = "value" }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("forecast");
   const voteShareLabel = voteShareLabelProp ?? t("voteShareLabel");
@@ -180,7 +186,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         Plot.text(labels, {
           x: "date",
           y: "ly",
-          text: (d: Point) => `${d.party} ${fmtPct(d.mean)}`,
+          text: (d: Point) => (endLabels === "party" ? d.party : `${d.party} ${fmtPct(d.mean)}`),
           fill: FURNITURE.text,
           dx: mobile ? 6 : 8,
           fontSize: mobile ? 11 : 12,
@@ -227,7 +233,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     const resizeObserver = new ResizeObserver(() => setTimeout(render, 100));
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [points, series, lastIndex, voteShareLabel, locale, banded, polls]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [points, series, lastIndex, voteShareLabel, locale, banded, polls, endLabels]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full">

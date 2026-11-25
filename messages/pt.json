@@ -293,7 +293,7 @@
     "economyAction": "Ver a leitura e a evidência",
     "nowcastTitle": "Próximas legislativas",
     "nowcastDate": "estimativa de {date}, sondagens até {poll}",
-    "nowcastFinding": "{party} elegia mais deputados do que qualquer outro partido em {p} das simulações",
+    "nowcastFinding": "Média das sondagens: {shares}",
     "nowcastNote": "Não há eleições marcadas: é o resultado que as sondagens davam se a votação fosse no dia da última.",
     "nowcastOpen": "Ver a estimativa",
     "electionsKicker": "Eleições",
