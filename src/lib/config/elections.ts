@@ -52,6 +52,18 @@ export const OFFICIAL_RESULTS: Record<string, ReadonlyArray<{ round: 1 | 2 | nul
   ],
 };
 
+/**
+ * Seats won at the 18 May 2025 parliamentary election (230). Checked on 25 Nov
+ * 2026 against the results file the model reads: D'Hondt over the 2025 parish
+ * votes in the 20 territorial districts gives AD 89, PS 58, CH 58, IL 9, L 6,
+ * CDU 3, BE 1, PAN 1, JPP 1, and the four emigration seats went AD 2, CH 2
+ * (estimador-elections `seat_prediction.py`, scenario S_2025). JPP is not
+ * modelled, so the live nowcast compares the other eight.
+ */
+export const PARLIAMENTARY_2025_SEATS: Readonly<Record<string, number>> = {
+  AD: 91, CH: 60, PS: 58, IL: 9, L: 6, CDU: 3, BE: 1, PAN: 1, JPP: 1,
+};
+
 // All available elections
 export const ALL_ELECTIONS = [
   PRESIDENTIAL_2026,
