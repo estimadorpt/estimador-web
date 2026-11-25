@@ -27,7 +27,7 @@ import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/conf
 import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
 import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
 import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
-import { mostSeatsShares, NOWCAST_DIR, nowcastProblems, seatRanges, type NowcastFile } from '@/lib/legislative-nowcast';
+import { mostSeatsShares, NOWCAST_DIR, nowcastProblems, parliamentSeats, seatRanges, seatSum, type NowcastFile } from '@/lib/legislative-nowcast';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -153,19 +153,29 @@ export async function loadParliamentaryArchive() {
 
 export type ParliamentaryArchive = Awaited<ReturnType<typeof loadParliamentaryArchive>>;
 
-/** Seat groupings the nowcast states as arithmetic (never as a forecast of a government). */
-export const NOWCAST_SEAT_SUMS: ReadonlyArray<readonly string[]> = [
+/**
+ * Who could reach a majority without Chega, the question the page answers
+ * (a government with Chega is not on the table, so its sums are folded and
+ * never lead): the right without Chega, the left, and PS with AD.
+ */
+export const NOWCAST_MAJORITIES: ReadonlyArray<readonly string[]> = [
   ['AD', 'IL'],
+  ['PS', 'L', 'CDU', 'BE', 'PAN'],
+  ['PS', 'AD'],
+];
+/** The sums with Chega, stated as arithmetic in a fold. */
+export const NOWCAST_OTHER_SUMS: ReadonlyArray<readonly string[]> = [
   ['AD', 'CH'],
   ['AD', 'IL', 'CH'],
-  ['PS', 'L', 'CDU', 'BE'],
 ];
+/** The parliament bar's order, left to right. */
+export const NOWCAST_HOUSE_ORDER = ['BE', 'CDU', 'L', 'PAN', 'PS', 'AD', 'IL', 'CH'] as const;
 
 /**
  * The live legislative nowcast, summarised on the server like the archive:
  * the page gets the file's shares, trend and polls, and from the seat draws
- * (build-only) the most-seats shares, the party seat distributions and the
- * seat-sum arithmetic. `available` is false when a file is missing or
+ * (build-only) the most-seats shares, the party seat ranges, one parliament
+ * to draw and the seat sums. `available` is false when a file is missing or
  * fails `nowcastProblems`, and the page then says so instead of drawing zeros.
  */
 export async function loadLegislativeNowcast() {
@@ -186,11 +196,10 @@ export async function loadLegislativeNowcast() {
       file,
       simulations: seatData.length,
       mostSeats: mostSeatsShares(seatData, file.parties),
-      seatSums: NOWCAST_SEAT_SUMS.map(parties => ({
-        parties,
-        ...seatSumArithmetic(seatData, parties, majorityThreshold),
-      })),
+      majorities: NOWCAST_MAJORITIES.map(parties => seatSum(seatData, parties, majorityThreshold)),
+      otherSums: NOWCAST_OTHER_SUMS.map(parties => seatSum(seatData, parties, majorityThreshold)),
       seats: seatRanges(seatData, file.parties),
+      parliament: parliamentSeats(seatData, NOWCAST_HOUSE_ORDER.filter(p => file.parties.includes(p)), 230),
       districtForecast,
       contestedSeats,
     };

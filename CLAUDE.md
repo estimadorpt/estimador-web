@@ -756,20 +756,29 @@ stays online. The files come from estimador-elections (`src/export_nowcast_web.p
 `main` by `pt.estimador.nowcast` on the Mac (`scripts/nowcast_daily.sh`, runbook
 `docs/live_nowcast.md` there): every hour it checks the poll feed and refits only when it holds new
 polls. Data-only pushes: every date, number and finding on the page and in the homepage's elections
-channel is read from the files, never typed, and no test pins a value. Structure (owner's phone review and Fable's
-review, 24 November 2026): the h1 is the party with most seats in the most draws; who wins most seats
-(`ProbBar` rows, the tie its own row); votes and seats in one grammar (median, `IntervalBand` 90%, the
-2025 result as the square on votes, 116 dashed on seats; `seatRanges`), the seat sums folded under the
-seats (owner: a coalition with Chega is close to impossible, so the sums stay out of the lede and the
-headings); the poll average since the election (its band leaves out the shared polling error); districts
-behind a disclosure; the method as one visible sentence, the rest and the poll list folded. Keep the
-text short: the owner reads it on a phone. Every h2 is a finding built from the files, with fallbacks. No share card of its own yet (it uses the elections/brand card).
+channel is read from the files, never typed, and no test pins a value. Structure (a tracker, after the
+owner's review of 24-25 November 2026; the case is in the review doc linked from the project thread): the
+h1 is the vote shares readers know from the news ("PS 30%, Chega 27%, AD 25%: três partidos em 5
+pontos"), the lede the poll count and the largest move in four weeks (`recentMove`); one scoreboard
+(votes and seats, each with its 90% margin in small type and the change since 2025, in ink only when
+the margin leaves out the 2025 value; seats against `PARLIAMENTARY_2025_SEATS` in `config/elections.ts`);
+the poll average since the election with every poll as a dot on the model's eight-party base
+(`onModelBase`; its band leaves out the shared polling error); one parliament bar (`ParliamentBar`,
+mean seats by largest remainder, `parliamentSeats`) and who reaches 116 without Chega (`NOWCAST_MAJORITIES`:
+AD + IL, the left, PS + AD; owner: a coalition with Chega is close to impossible, so the sums with Chega
+are folded and never lead), with who comes first as "6 de cada 10 cenários"; the latest five polls as
+published, the heading naming the newest one that disagrees with the average; districts and the method
+folded at the end. Readers compare our shares with published polls and the 2025 result, so the page
+says once that the shares are over the eight largest parties and that 2025 leaves out the emigration
+vote (the export's `previous.shares` is territory-only). Keep the text short: the owner reads it on a
+phone. Every heading is a finding built from the files, with fallbacks. No share card of its own yet (it uses the elections/brand card).
 
 ### Election Chart Components (`src/components/charts/`)
 - **HouseEffects.tsx**: Custom HTML/CSS matrix with no hover tooltip (an exception to the hover-tip rule above): each cell's `title` and the `<ChartTable>` twin carry the exact values; the cell colours come from `src/lib/election-heatmap.ts` (one forest ink on every cell, the red and blue ramps capped where it still reaches 4.5:1, `election-heatmap.test.ts` sweeps them)
 - **CoalitionDotPlot.tsx**: the two blocs' seat totals as a dot histogram (stacked dots: `drawnSeatIndices`, every 12th model draw with its three emigration scenarios, 750 dots, about 200 on phones; never every k-th row, which drew only the 2024 scenario); the bloc colours are PS's and AD's (under 3:1 on white, so every row names its bloc)
 - **DistrictSummary.tsx**: ENSC methodology for contested seats (`seatChangeBaseline` replaces the archive's note, which names 2024 and Castelo Branco); each district card shows every party above 5% (`seatChangesOf`, `SEAT_CHANGE_SHOWN`) with "+1/−1 mandato ou mais"; the third tile is "Abaixo do limiar (ENSC ≤ 0,8)", with a watch line for districts between 0,4 and 0,8 (`districtsToWatch`); `CONTESTED_ENSC` and `WATCH_ENSC` live in `election-aggregates.ts`
-- **PollingChart.tsx**: takes a columnar `TrendSeries` (`compactTrendSeries` in `election-aggregates.ts`) instead of long rows, so the page payload stays small; `band` names the band's coverage (the archive's 94% HDI by default, the nowcast's central 90%)
+- **PollingChart.tsx**: takes a columnar `TrendSeries` (`compactTrendSeries` in `election-aggregates.ts`) instead of long rows, so the page payload stays small; `band` names the band's coverage (the archive's 94% HDI by default, the nowcast's central 90%); `polls` draws each poll as a light dot under the lines (the nowcast passes them on the line's own base)
+- **ParliamentBar.tsx**: one parliament as a single bar, parties left to right, the majority marked by ticks above and below (never across a party's figures), narrow parties in a key under it
 - **Numbers** (`src/lib/election-display.ts`): election probabilities print "menos de 1%" / "mais de 99%" ("under 1%" / "over 99%") everywhere, tables and twins included, never "<1%" or 0% and 100% (`formatElectionProbability`, `electionProbabilityParts` for a headline figure); counts group from four digits (`formatElectionNumber` uses `useGrouping: 'always'`: "9 000" with a no-break space in Portuguese, like `formatInteger` and `formatCount`), and the methodology MDX writes its counts the same way by hand ("9 000", "8 000", "1 000"). Dates: `formatElectionDate` for table columns ("09/01/2026", dd/mm/aaaa so the column lines up; "9 Jan 2026"), `formatElectionShortDate` for chart ticks and tips ("6 fev. 2026"), `formatElectionLongDate` for readouts and footers. `PARLIAMENTARY_PARTY_ORDER` (AD PS CH IL L CDU BE PAN) and `sortByPartyOrder` are the archive's one party order, so the left bloc reads PS + L + CDU + BE (`src/lib/config/blocs.ts` still lists it PS, BE, CDU, L: sort it before showing it). The round switch is choice boxes made of links (`choiceClass`, `?round=1`, `aria-current`; without JavaScript `?round=1` still shows round 2, a static export serves one file). The archived charts have no filters: every line is named at its end (the presidential lines with their last estimate and 90% interval; `PollingChart` draws every party, with bands on the three largest only), and the district map's readout sits beside the map (under it on a phone) in a live region present from load.
 - **Sections with one chart**: an h2 finding (`src/lib/election-findings.ts`: "António José Seguro vencia a 2.ª volta em mais de 99% das simulações") or statement, then the `<DataCard>`, whose subtitle carries the explanation; no grey lede between them.
 - The election methodology is its own page, `/eleicoes/metodologia` (`src/content/methodology/eleicoes/{pt,en}.mdx`, dated). Every h2 and h3 there and on `/economia/metodologia` gets a slug id (`headingSlug`, `headingText` in `src/lib/election-methodology.ts`), so keep heading texts unique; charts deep-link through `ELECTION_METHOD_ANCHORS` and `electionMethodHref(section, locale)`, and `election-methodology.test.ts` keeps the anchors and the MDX in step; the `/metodologia` page's elections row carries the old `#eleicoes` and `#segunda-volta-2026` anchors.

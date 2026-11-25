@@ -136,6 +136,80 @@ export function seatRanges(draws: readonly SeatDraw[], parties: readonly string[
     .sort((a, b) => b.median - a.median || b.hi90 - a.hi90);
 }
 
+/** A group of parties' seats added up draw by draw: the median, the central 90% and the share of draws at the threshold or above. */
+export interface SeatSum {
+  parties: readonly string[];
+  median: number;
+  lo90: number;
+  hi90: number;
+  reach: number;
+}
+
+export function seatSum(draws: readonly SeatDraw[], parties: readonly string[], threshold: number): SeatSum {
+  if (draws.length === 0) return { parties, median: NaN, lo90: NaN, hi90: NaN, reach: NaN };
+  const totals = draws.map(d => parties.reduce((sum, p) => sum + seatsOf(d, p), 0)).sort((a, b) => a - b);
+  return {
+    parties,
+    median: Math.round(quantileSorted(totals, 0.5)),
+    lo90: Math.round(quantileSorted(totals, 0.05)),
+    hi90: Math.round(quantileSorted(totals, 0.95)),
+    reach: totals.filter(v => v >= threshold).length / totals.length,
+  };
+}
+
+/**
+ * One parliament to draw: each party's mean seats over the draws, rounded by
+ * largest remainder so the parties fill the house exactly (the medians need
+ * not add up). Parties keep the order given (the page passes left to right).
+ */
+export function parliamentSeats(draws: readonly SeatDraw[], parties: readonly string[], house: number): Array<{ party: string; seats: number }> {
+  if (draws.length === 0) return [];
+  const means = parties.map(party => draws.reduce((sum, d) => sum + seatsOf(d, party), 0) / draws.length);
+  const scale = house / means.reduce((a, b) => a + b, 0);
+  const exact = means.map(m => m * scale);
+  const seats = exact.map(Math.floor);
+  let left = house - seats.reduce((a, b) => a + b, 0);
+  const byRemainder = exact.map((e, i) => ({ i, r: e - Math.floor(e) })).sort((a, b) => b.r - a.r);
+  for (const { i } of byRemainder) {
+    if (left <= 0) break;
+    seats[i]++;
+    left--;
+  }
+  return parties.map((party, i) => ({ party, seats: seats[i] }));
+}
+
+/**
+ * The largest move in the poll average over about the last month: the trend's
+ * last value against the newest saved week at least `days` earlier.
+ */
+export function recentMove(trend: TrendSeries, days = 28): { party: string; move: number; since: string } | null {
+  const day = (iso: string) => Date.parse(`${iso}T00:00:00Z`) / 86_400_000;
+  const last = trend.dates.length - 1;
+  if (last < 1) return null;
+  let j = last - 1;
+  while (j > 0 && day(trend.dates[last]) - day(trend.dates[j]) < days) j--;
+  let best: { party: string; move: number; since: string } | null = null;
+  for (const [party, series] of Object.entries(trend.parties)) {
+    const now = series.mean[last];
+    const then = series.mean[j];
+    if (now == null || then == null) continue;
+    const move = now - then;
+    if (!best || Math.abs(move) > Math.abs(best.move)) best = { party, move, since: trend.dates[j] };
+  }
+  return best;
+}
+
+/**
+ * A poll's shares on the model's base: out of the votes for the modelled
+ * parties only, as the estimate is, so a poll's dot sits on the same scale as
+ * the line. A poll that lists none of them gives nothing.
+ */
+export function onModelBase(shares: Record<string, number>, parties: readonly string[]): Record<string, number> {
+  const total = parties.reduce((sum, p) => sum + (shares[p] ?? 0), 0);
+  if (!(total > 0)) return {};
+  return Object.fromEntries(parties.filter(p => shares[p] != null).map(p => [p, shares[p] / total]));
+}
+
 /** The parties by their chance of most seats, highest first (ties broken by the national median order). */
 export function rankedByMostSeats(outright: Record<string, number>, order: readonly string[]): string[] {
   return [...order].sort((a, b) => (outright[b] ?? 0) - (outright[a] ?? 0));
