@@ -42,8 +42,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: PATH,
     title: pt ? 'Próximas legislativas: a estimativa diária' : 'Next parliamentary election: the daily estimate',
     description: pt
-      ? 'Votos e mandatos se as legislativas fossem no dia da última sondagem, estimados a partir das sondagens publicadas desde maio de 2025.'
-      : 'Votes and seats if the parliamentary election were held on the day of the latest poll, estimated from the polls published since May 2025.',
+      ? 'A média das sondagens para as próximas legislativas: votos, deputados e quem chega à maioria se a votação fosse no dia da última sondagem.'
+      : 'The poll average for the next parliamentary election: votes, seats and who reaches a majority if the vote were held on the day of the latest poll.',
   });
 }
 
@@ -170,17 +170,17 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
     return { text: formatSignedNumber((seatsFor(party) ?? s.median) - before, locale, 0), clear: before < s.lo90 || before > s.hi90 };
   };
 
-  // The trend: who rose and who fell most since the election, on the scoreboard's baseline.
-  const sinceElection = national
-    .filter(r => previous.shares[r.party] != null)
-    .map(r => ({ party: r.party, move: r.median - previous.shares[r.party] }))
+  // The trend: who rose and who fell most in the poll average the chart draws (its first and last
+  // values; its band leaves out the shared polling error, so these moves are the average's own).
+  const sinceElection = Object.entries(trend.parties)
+    .map(([party, series]) => ({ party, move: (series.mean.at(-1) ?? 0) - (series.mean[0] ?? 0) }))
     .sort((a, b) => b.move - a.move);
   const riser = sinceElection[0];
   const faller = sinceElection.at(-1)!;
   const trendHeading = riser && riser.move >= 0.005 && faller.move <= -0.005
     ? (pt
-      ? `Desde ${prevMonth}, ${art(riser.party)} subiu ${gap(riser.move)} e ${art(faller.party)} desceu ${gap(-faller.move)}`
-      : `Since ${prevMonth}, ${short(riser.party)} is up ${gap(riser.move)} and ${short(faller.party)} down ${gap(-faller.move)}`)
+      ? `Na média das sondagens, ${art(riser.party)} subiu ${gap(riser.move)} desde ${prevMonth} e ${art(faller.party)} desceu ${gap(-faller.move)}`
+      : `In the poll average, ${short(riser.party)} is up ${gap(riser.move)} since ${prevMonth} and ${short(faller.party)} down ${gap(-faller.move)}`)
     : (pt ? `As sondagens desde ${prevMonth}` : `The polls since ${prevMonth}`);
   const pollDots = file.polls.flatMap(poll =>
     Object.entries(onModelBase(poll.shares, file.parties))
@@ -302,8 +302,8 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
               </table>
               <p className={note}>
                 {pt
-                  ? `Por baixo, a margem: o resultado fica dentro dela em 9 de cada 10 cenários. É larga porque as sondagens podem falhar todas para o mesmo lado (em ${prevYear}, o Chega teve 22,8% e as sondagens davam-lhe 18,4%). A cinzento, as variações dentro da margem.`
-                  : `Underneath, the margin: the result falls inside it in 9 of every 10 scenarios. It is wide because the polls can all miss the same way (in ${prevYear}, Chega won 22.8% where the polls had 18.4%). In grey, the changes inside the margin.`}
+                  ? 'Por baixo, a margem: o resultado fica dentro dela em 9 de cada 10 cenários. É larga porque as sondagens podem falhar todas para o mesmo lado. A cinzento, as variações dentro da margem.'
+                  : 'Underneath, the margin: the result falls inside it in 9 of every 10 scenarios. It is wide because the polls can all miss the same way. In grey, the changes inside the margin.'}
               </p>
               <p className={note.replace('mt-2', 'mt-1')}>
                 {pt
@@ -324,7 +324,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
               source={modelSource}
               {...frame}
             >
-              <PollingChart series={{ dates: trend.dates, parties: trend.parties }} voteShareLabel={t('forecast.voteShareLabel')} band={{ percent: Math.round(trend.interval * 100), hdi: false }} showNote={false} polls={pollDots} />
+              <PollingChart series={{ dates: trend.dates, parties: trend.parties }} voteShareLabel={t('forecast.voteShareLabel')} band={{ percent: Math.round(trend.interval * 100), hdi: false }} showNote={false} polls={pollDots} endLabels="party" />
             </DataCard>
           </section>
 
@@ -456,8 +456,8 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                   closeLeadNote={closeLeadNote}
                   headingLevel={3}
                   seatChangeBaseline={pt
-                    ? `Os +1 e −1 comparam cada partido com o seu próprio número de mandatos mais frequente nesse distrito, nas simulações, e não com ${prevYear}, e incluem os casos de dois mandatos ou mais. Como cada partido é comparado com o seu valor, os ganhos e as perdas de um distrito não têm de se compensar: quando um mandato se divide quase a meias entre dois partidos, cada um pode aparecer com +1 ou −1, conforme o seu valor mais frequente.`
-                    : `The +1 and −1 compare each party with its own most frequent seat count in that district across the simulations, not with ${prevYear}, and include two seats or more. Because each party is compared with its own count, a district’s gains and losses need not balance: when a seat is split almost evenly between two parties, each can show +1 or −1, depending on its own most frequent count.`}
+                    ? `Os +1 e −1 comparam cada partido com o seu próprio número de mandatos mais frequente nesse distrito, nos cenários, e não com ${prevYear}, e incluem os casos de dois mandatos ou mais. Como cada partido é comparado com o seu valor, os ganhos e as perdas de um distrito não têm de se compensar: quando um mandato se divide quase a meias entre dois partidos, cada um pode aparecer com +1 ou −1, conforme o seu valor mais frequente.`
+                    : `The +1 and −1 compare each party with its own most frequent seat count in that district across the scenarios, not with ${prevYear}, and include two seats or more. Because each party is compared with its own count, a district’s gains and losses need not balance: when a seat is split almost evenly between two parties, each can show +1 or −1, depending on its own most frequent count.`}
                 />
               </div>
             </Disclosure>

@@ -5,7 +5,6 @@ import { ELECTION_ROUTES } from '@/lib/config/homepage';
 import { PARLIAMENTARY_2025_FORECAST_CUTOFF, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
 import { credibleIntervalLabel, formatElectionLongDate, formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
 import { loadForecastData, loadLegislativeNowcast, loadSecondRoundData } from '@/lib/utils/data-loader';
-import { rankedByMostSeats } from '@/lib/legislative-nowcast';
 import { ChannelHead } from '@/components/instrument';
 import { likeliestWinner, mostSeats, partyWithArticle } from '@/lib/election-findings';
 import type { ElectionConfig } from '@/types';
@@ -116,7 +115,8 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
   // The live legislative nowcast leads the channel when its files are there;
   // its finding is read from the seat draws like the archive's.
   const nowcast = await loadLegislativeNowcast();
-  const nowcastLeader = nowcast.available ? rankedByMostSeats(nowcast.mostSeats.outright, nowcast.file.parties)[0] : null;
+  // Its finding is the poll average's top three, as on the page's h1.
+  const nowcastLeader = nowcast.available ? nowcast.file.national[0]?.party ?? null : null;
 
   return (
     <section aria-labelledby="home-elections" className="min-w-0">
@@ -126,7 +126,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
           <p className="text-[13px] text-graphite">
             <span className="font-semibold text-ink">{t('nowcastTitle')}</span>{' · '}{t('nowcastDate', { date: longDate(nowcast.file.run.as_of), poll: longDate(nowcast.file.run.last_poll) })}
           </p>
-          <p className="disp mt-1 text-[22px] leading-[1.08] md:text-[24px]">{t('nowcastFinding', { party: partyWithArticle(nowcastLeader, locale), p: formatElectionProbability(nowcast.mostSeats.outright[nowcastLeader], locale) })}</p>
+          <p className="disp mt-1 text-[22px] leading-[1.08] md:text-[24px]">{t('nowcastFinding', { shares: nowcast.file.national.slice(0, 3).map(r => `${r.party === 'CH' ? 'Chega' : r.party} ${formatElectionPercent(r.median, locale, 0)}`).join(', ') })}</p>
           <p className="mt-1 max-w-[70ch] text-[13px] text-graphite">{t('nowcastNote')}</p>
           <Link href="/eleicoes/proximas-legislativas" locale={locale} className="mt-1 inline-flex min-h-11 items-center text-[15px] font-semibold text-ink underline underline-offset-4">
             {t('nowcastOpen')}&nbsp;<span aria-hidden="true">→</span>
