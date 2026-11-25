@@ -344,9 +344,9 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                   <tr className={headRow}>
                     <th scope="col" className={headCell}>{pt ? 'Sem o Chega' : 'Without Chega'}</th>
                     <th scope="col" className={`${headCell} text-right`}>{pt ? 'Deputados' : 'Seats'}</th>
-                    <th scope="col" className="w-[34%] min-w-[84px] pb-1.5 pr-3 font-medium">
+                    <th scope="col" className="w-[30%] pb-1.5 pr-3 font-medium">
                       <span className="sr-only">{pt ? 'Margem e maioria' : 'Margin and majority'}</span>
-                      <Ruler min={0} max={sumMax} minor={10} major={50} labels={sumLabels} />
+                      <Ruler min={0} max={sumMax} minor={10} major={50} labels={sumLabels} className="max-sm:[&>span:nth-child(even)]:invisible" />
                     </th>
                     <th scope="col" className="whitespace-nowrap pb-1.5 text-right font-medium">{pt ? `${majorityThreshold} ou +` : `${majorityThreshold}+`}</th>
                   </tr>
@@ -356,7 +356,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                     <tr key={m.parties.join('+')} className="border-b border-grid align-top">
                       <th scope="row" className="py-1.5 pr-2 text-left font-normal">
                         {m.parties.length > 3
-                          ? <>{pt ? 'Esquerda' : 'The left'}<span className={small}>{m.parties.join(', ')}</span></>
+                          ? <>{pt ? 'Esquerda' : 'The left'}<span className="block text-[12px] leading-4 text-graphite">{m.parties.join(', ')}</span></>
                           : m.parties.join(' + ')}
                       </th>
                       <td className="py-1.5 pr-2 text-right">
