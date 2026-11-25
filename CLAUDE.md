@@ -764,7 +764,7 @@ pontos"), the lede the poll count and the largest move in four weeks (`recentMov
 the margin leaves out the 2025 value; seats against `PARLIAMENTARY_2025_SEATS` in `config/elections.ts`);
 the poll average since the election with every poll as a dot on the model's eight-party base
 (`onModelBase`; its band leaves out the shared polling error); one parliament bar (`ParliamentBar`,
-mean seats by largest remainder, `parliamentSeats`) and who reaches 116 without Chega (`NOWCAST_MAJORITIES`:
+mean seats by largest remainder, `parliamentSeats`; the scoreboard and the sums print the bar's count, so they add up, with ranges and shares from the draws) and who reaches 116 without Chega (`NOWCAST_MAJORITIES`:
 AD + IL, the left, PS + AD; owner: a coalition with Chega is close to impossible, so the sums with Chega
 are folded and never lead), with who comes first as "6 de cada 10 cenários"; the latest five polls as
 published, the heading naming the newest one that disagrees with the average; districts and the method

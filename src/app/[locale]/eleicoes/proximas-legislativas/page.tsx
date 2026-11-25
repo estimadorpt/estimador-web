@@ -153,6 +153,11 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
   // The scoreboard: votes and seats, each against 2025. A change is set in ink only when the
   // 90% range leaves out the 2025 value; inside it, the change is within the margin.
   const seatRow = new Map(seats.map(s => [s.party, s]));
+  // One seat count per party everywhere on the page: the parliament bar's (mean seats, filled to 230),
+  // so the scoreboard, the bar and the sums add up for a reader; the ranges and shares come from the draws.
+  const houseSeats = new Map(parliament.map(p => [p.party, p.seats]));
+  const seatsFor = (party: string) => houseSeats.get(party) ?? seatRow.get(party)?.median;
+  const sumSeats = (parties: readonly string[]) => parties.reduce((sum, p) => sum + (seatsFor(p) ?? 0), 0);
   const voteChange = (r: (typeof national)[number]) => {
     const before = previous.shares[r.party];
     if (before == null) return null;
@@ -162,7 +167,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
     const s = seatRow.get(party);
     const before = PARLIAMENTARY_2025_SEATS[party];
     if (!s || before == null) return null;
-    return { text: formatSignedNumber(s.median - before, locale, 0), clear: before < s.lo90 || before > s.hi90 };
+    return { text: formatSignedNumber((seatsFor(party) ?? s.median) - before, locale, 0), clear: before < s.lo90 || before > s.hi90 };
   };
 
   // The trend: who rose and who fell most since the election, on the scoreboard's baseline.
@@ -286,7 +291,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                         </td>
                         <td className={`py-1.5 pr-2 pt-2 text-right tabular-nums ${dv?.clear ? 'font-semibold text-ink' : 'text-graphite'}`}>{dv?.text ?? '—'}</td>
                         <td className="py-1.5 pl-3 pr-2 text-right">
-                          <span className="fig text-[19px] leading-6">{s ? count(s.median) : '—'}</span>
+                          <span className="fig text-[19px] leading-6">{s ? count(seatsFor(r.party) ?? s.median) : '—'}</span>
                           {s && <span className={small}>{s.lo90}–{s.hi90}</span>}
                         </td>
                         <td className={`py-1.5 pt-2 text-right tabular-nums ${ds?.clear ? 'font-semibold text-ink' : 'text-graphite'}`}>{ds?.text ?? '—'}</td>
@@ -355,11 +360,11 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                           : m.parties.join(' + ')}
                       </th>
                       <td className="py-1.5 pr-2 text-right">
-                        <span className="fig text-[19px] leading-6">{count(m.median)}</span>
+                        <span className="fig text-[19px] leading-6">{count(sumSeats(m.parties))}</span>
                         <span className={small}>{m.lo90}–{m.hi90}</span>
                       </td>
                       <td className="py-1.5 pr-3 pt-3">
-                        <IntervalBand lo={m.lo90} md={m.median} hi={m.hi90} min={0} max={sumMax} reference={majorityThreshold} />
+                        <IntervalBand lo={m.lo90} md={sumSeats(m.parties)} hi={m.hi90} min={0} max={sumMax} reference={majorityThreshold} />
                       </td>
                       <td className="whitespace-nowrap py-1.5 pt-2 text-right tabular-nums">{prob(m.reach)}</td>
                     </tr>
@@ -374,7 +379,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                     {otherSums.map(m => (
                       <tr key={m.parties.join('+')} className="border-b border-grid">
                         <th scope="row" className="py-1.5 pr-2 text-left font-normal">{m.parties.join(' + ')}</th>
-                        <td className="py-1.5 pr-2 text-right tabular-nums">{count(m.median)} <span className="text-graphite">({m.lo90}–{m.hi90})</span></td>
+                        <td className="py-1.5 pr-2 text-right tabular-nums">{count(sumSeats(m.parties))} <span className="text-graphite">({m.lo90}–{m.hi90})</span></td>
                         <td className="py-1.5 text-right tabular-nums">{prob(m.reach)}</td>
                       </tr>
                     ))}
