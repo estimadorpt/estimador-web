@@ -261,3 +261,26 @@ export function emigrationTitle(share: number, years: readonly string[], locale:
     ? `Repartir os 4 deputados da emigração como em ${a} ou em ${b} ${pt}`
     : `Sharing out the 4 emigration seats as in ${a} or as in ${b} ${en}`;
 }
+
+/** The lead histogram's heading: how far ahead in votes the leader must be to win more seats than the runner-up. */
+export function leadTitle(h: { a: string; b: string; crossover: number | null }, locale: NowcastLocale): string {
+  const x = h.crossover;
+  if (x == null || x > 5 || x < -5) {
+    return locale === 'pt'
+      ? `Quem fica em primeiro, conforme a vantagem ${deArt(h.a)} sobre ${art(h.b)}`
+      : `Who comes first, by ${partyName(h.a)}'s lead over ${partyName(h.b)}`;
+  }
+  if (x === 0) {
+    return locale === 'pt'
+      ? `Basta ${aArt(h.a)} ter mais votos do que ${art(h.b)} para eleger mais deputados`
+      : `${partyName(h.a)} needs only more votes than ${partyName(h.b)} to win more seats`;
+  }
+  if (x > 0) {
+    return locale === 'pt'
+      ? `Para eleger mais deputados do que ${art(h.b)}, ${art(h.a)} precisa de cerca de ${points(x, 'pt')} de vantagem nos votos`
+      : `To win more seats than ${partyName(h.b)}, ${partyName(h.a)} needs a lead of about ${points(x, 'en')} in votes`;
+  }
+  return locale === 'pt'
+    ? `${Art(h.a)} elege mais deputados do que ${art(h.b)} mesmo com até ${points(-x, 'pt')} a menos nos votos`
+    : `${partyName(h.a)} wins more seats than ${partyName(h.b)} even up to ${points(-x, 'en')} behind in votes`;
+}

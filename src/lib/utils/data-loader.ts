@@ -28,7 +28,7 @@ import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } 
 import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
 import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
 import { NOWCAST_DIR, nowcastProblems, seatSum, type NowcastFile } from '@/lib/legislative-nowcast';
-import { firstByPattern, leaderChangeShare, NOWCAST_EMIGRATION_PATTERNS, pollsterGaps, summariseNowcastSeats, voteShares } from '@/lib/nowcast-summary';
+import { firstByPattern, leadHistogram, leaderChangeShare, NOWCAST_EMIGRATION_PATTERNS, pollsterGaps, summariseNowcastSeats, voteShares } from '@/lib/nowcast-summary';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -225,6 +225,11 @@ export async function loadLegislativeNowcast() {
       patterns: firstByPattern(seatData, order),
       leaderChange: recentA && recentB ? leaderChangeShare(seatData, recentA, recentB, order) : NaN,
       gaps: pollsterGaps(file.polls, file.trend, file.parties, NOWCAST_GAP_PARTIES),
+      // The two parties most often first, and the simulations by the first's lead over the second.
+      leadHistogram: (() => {
+        const [a, b] = Object.entries(summary.first).sort((x, y) => y[1] - x[1]).map(([p]) => p);
+        return a && b ? leadHistogram(draws, a, b, order) : null;
+      })(),
       districtForecast,
       contestedSeats,
     };

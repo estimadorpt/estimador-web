@@ -160,3 +160,50 @@ export function pollsterGaps(polls: readonly NowcastPoll[], trend: TrendSeries, 
 export function seatTotal(seats: ReadonlyArray<{ party: string; seats: number }>, parties: readonly string[]): number {
   return parties.reduce((sum, p) => sum + (seats.find(s => s.party === p)?.seats ?? 0), 0);
 }
+
+/** Simulations laid out by one party's lead over another in votes, and who wins most seats in each. */
+export interface LeadHistogram {
+  a: string;
+  b: string;
+  /** One bar per whole point of lead (a − b, in points), from the lowest to the highest. */
+  bins: Array<{ x: number; counts: Record<string, number> }>;
+  /**
+   * The lead in votes from which `a` wins more seats than `b` in at least half the simulations
+   * (the lowest edge of the first such bar, in whole points; negative when `a` needs fewer votes);
+   * null when no bar with 20 simulations or more crosses.
+   */
+  crossover: number | null;
+  draws: number;
+}
+
+/**
+ * The draws by `a`'s lead over `b` in national votes (each seat draw carries its votes as `vote`),
+ * one bar per point, the tails folded into the end bars (the outer half per cent each side).
+ * Each draw counts for the party with most seats, or 'tie'.
+ */
+export function leadHistogram(draws: readonly SeatDraw[], a: string, b: string, parties: readonly string[]): LeadHistogram | null {
+  const rows = draws
+    .map(d => ({ d, vote: d.vote as unknown as Record<string, number> | undefined }))
+    .filter((r): r is { d: SeatDraw; vote: Record<string, number> } => r.vote != null && r.vote[a] != null && r.vote[b] != null);
+  if (rows.length < 100) return null;
+  const leads = rows.map(r => 100 * (r.vote[a] - r.vote[b]));
+  const sorted = [...leads].sort((x, y) => x - y);
+  const lo = Math.floor(quantileSorted(sorted, 0.005));
+  const hi = Math.floor(quantileSorted(sorted, 0.995));
+  const bins = new Map<number, Record<string, number>>();
+  const beats = new Map<number, { yes: number; n: number }>();
+  for (let x = lo; x <= hi; x++) { bins.set(x, {}); beats.set(x, { yes: 0, n: 0 }); }
+  rows.forEach((r, i) => {
+    const x = Math.min(hi, Math.max(lo, Math.floor(leads[i])));
+    const who = leaderOf(r.d, parties);
+    const c = bins.get(x)!;
+    c[who] = (c[who] ?? 0) + 1;
+    const bt = beats.get(x)!;
+    bt.n++;
+    if (seatsOf(r.d, a) > seatsOf(r.d, b)) bt.yes++;
+  });
+  const list = [...bins.entries()].map(([x, counts]) => ({ x, counts }));
+  const crossing = [...beats.entries()].sort((p, q) => p[0] - q[0]).find(([, v]) => v.n >= 20 && v.yes / v.n >= 0.5);
+  const crossover = crossing ? crossing[0] : null;
+  return { a, b, bins: list, crossover, draws: rows.length };
+}

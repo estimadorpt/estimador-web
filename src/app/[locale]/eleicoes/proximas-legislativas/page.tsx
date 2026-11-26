@@ -19,6 +19,7 @@ import { ParliamentBar } from '@/components/charts/ParliamentBar';
 import { PollingChart } from '@/components/charts/PollingChart';
 import { NowcastNav } from '@/components/nowcast/NowcastNav';
 import { NowcastSource, SeatKey, SeatTable, SumRow } from '@/components/nowcast/parts';
+import { SeatBars } from '@/components/nowcast/SeatBars';
 
 const PATH = '/eleicoes/proximas-legislativas';
 
@@ -114,8 +115,11 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
 
         <div className="mx-auto max-w-7xl space-y-10 px-4 py-6">
           <section aria-label={pt ? 'Deputados e votos' : 'Seats and votes'} className="max-w-2xl">
-            <SeatTable rows={rows} locale={locale} sinceYear={prevYear} />
-            <SeatKey locale={locale} />
+            <SeatBars rows={rows} locale={locale} label={rows.map(r => (pt ? `${partyName(r.party)} ${r.seats} deputados, entre ${r.lo} e ${r.hi}` : `${partyName(r.party)} ${r.seats} seats, ${r.lo} to ${r.hi}`)).join('; ')} />
+            <Disclosure summary={pt ? 'Ver como tabela, com os votos' : 'Show as a table, with the votes'} className="mt-1">
+              <SeatTable rows={rows} locale={locale} sinceYear={prevYear} />
+              <SeatKey locale={locale} />
+            </Disclosure>
             <NowcastSource {...source} note={emigrationNote} />
           </section>
 
@@ -123,7 +127,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
             <h2 id="sondagens-titulo" className="text-[21px] leading-[27px] text-ink">{trendTitle(changes, prevYear, loc)}</h2>
             <p className="mt-1 text-[13.5px] text-graphite">{pt ? 'Cada ponto é uma sondagem; a linha é a estimativa, semana a semana.' : 'Each dot is a poll; the line is the estimate, week by week.'}</p>
             <div className="mt-3">
-              <PollingChart series={{ dates: file.trend.dates, parties: file.trend.parties }} voteShareLabel={pt ? '% dos votos' : '% of the vote'} band={{ percent: Math.round(file.trend.interval * 100), hdi: false }} showNote={false} polls={dots} endLabels="party" />
+              <PollingChart series={{ dates: file.trend.dates, parties: file.trend.parties }} voteShareLabel={pt ? '% dos votos' : '% of the vote'} band={{ percent: Math.round(file.trend.interval * 100), hdi: false }} showNote={false} polls={dots} endLabels="party" endValues={votes} />
             </div>
             <p className="mt-3"><TextLink href={`${PATH}/sondagens`} locale={locale}>{pt ? `As ${count(file.polls.length)} sondagens e como cada empresa se compara` : `All ${count(file.polls.length)} polls and how each pollster compares`}</TextLink></p>
           </section>

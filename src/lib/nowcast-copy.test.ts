@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { aboutPoints, chance, emigrationTitle, firstTitle, gapTitle, governTitle, majoritiesTitle, overviewLede, overviewTitle, pollsTitle, trendTitle } from './nowcast-copy';
-import { leaderChangeShare, pollsterGaps, roundToTotal, voteShares } from './nowcast-summary';
+import { aboutPoints, chance, emigrationTitle, firstTitle, gapTitle, governTitle, leadTitle, majoritiesTitle, overviewLede, overviewTitle, pollsTitle, trendTitle } from './nowcast-copy';
+import { leadHistogram, leaderChangeShare, pollsterGaps, roundToTotal, voteShares } from './nowcast-summary';
 import { pollOutlet } from './nowcast-polls';
+import type { SeatDraw } from './election-aggregates';
 
 const rows = [
   { party: 'PS', seats: 75, before: 58, lo: 59, hi: 92 },
@@ -99,5 +100,29 @@ describe('nowcast figures', () => {
     expect(pollOutlet('https://www.rtp.pt/noticias/x')).toEqual({ pt: 'a RTP', en: 'RTP' });
     expect(pollOutlet('https://executivedigest.sapo.pt/x')).toBeNull();
     expect(pollOutlet(null)).toBeNull();
+  });
+});
+
+describe('the lead histogram', () => {
+  // PS ahead by x points wins when x > 0, except within half a point either way, where Chega does.
+  const draws = Array.from({ length: 400 }, (_, i) => {
+    const lead = (i % 40) / 2 - 10; // -10 .. +9.5 points
+    const psWins = lead >= 0.5 || (lead > -0.5 && lead < 0 ? false : lead >= 0.5);
+    return { PS: psWins ? 80 : 70, CH: psWins ? 70 : 80, AD: 70, vote: { PS: 0.3 + lead / 200, CH: 0.3 - lead / 200, AD: 0.2 } };
+  }) as unknown as SeatDraw[];
+
+  it('bins the simulations by lead and finds where the result settles', () => {
+    const h = leadHistogram(draws, 'PS', 'CH', ['PS', 'CH', 'AD'])!;
+    expect(h.draws).toBe(400);
+    expect(h.bins.reduce((n, b) => n + Object.values(b.counts).reduce((x, y) => x + y, 0), 0)).toBe(400);
+    expect(h.crossover).toBe(0);
+    expect(leadTitle(h, 'pt')).toBe('Basta ao PS ter mais votos do que o Chega para eleger mais deputados');
+    expect(leadTitle({ ...h, crossover: 1 }, 'pt')).toBe('Para eleger mais deputados do que o Chega, o PS precisa de cerca de um ponto de vantagem nos votos');
+    expect(leadTitle({ ...h, crossover: -2 }, 'pt')).toBe('O PS elege mais deputados do que o Chega mesmo com até 2 pontos a menos nos votos');
+  });
+
+  it('falls back when the seats do not follow the votes, and needs the votes', () => {
+    expect(leadTitle({ a: 'PS', b: 'CH', crossover: null }, 'pt')).toBe('Quem fica em primeiro, conforme a vantagem do PS sobre o Chega');
+    expect(leadHistogram(draws.map(d => ({ ...d, vote: undefined })), 'PS', 'CH', ['PS', 'CH', 'AD'])).toBeNull();
   });
 });

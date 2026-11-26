@@ -81,7 +81,7 @@ export default async function NowcastPollsPage({ params }: { params: Promise<{ l
         <div className="mx-auto max-w-7xl space-y-10 px-4 py-6">
           <section aria-label={pt ? 'A evolução' : 'The trend'} className="max-w-3xl">
             <DataCard title={pt ? `Cada partido desde as eleições de ${prevYear}` : `Each party since the ${prevYear} election`} subtitle={pt ? 'A linha é a estimativa e a faixa a sua margem, sem o erro que todas as sondagens partilham.' : 'The line is the estimate and the band its margin, without the error all polls share.'}>
-              <PollingChart series={{ dates: trend.dates, parties: trend.parties }} voteShareLabel={pt ? '% dos votos' : '% of the vote'} band={{ percent: Math.round(trend.interval * 100), hdi: false }} showNote={false} polls={dots} endLabels="party" />
+              <PollingChart series={{ dates: trend.dates, parties: trend.parties }} voteShareLabel={pt ? '% dos votos' : '% of the vote'} band={{ percent: Math.round(trend.interval * 100), hdi: false }} showNote={false} polls={dots} endLabels="party" endValues={votes} />
             </DataCard>
           </section>
 

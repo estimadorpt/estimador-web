@@ -5,7 +5,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import { setRequestLocale } from '@/i18n/request-locale';
 import { loadLegislativeNowcast, TWO_THIRDS } from '@/lib/utils/data-loader';
 import { formatElectionLongDate, formatElectionShortDate, formatElectionNumber } from '@/lib/election-display';
-import { emigrationTitle, firstTitle, majoritiesTitle, partyName } from '@/lib/nowcast-copy';
+import { emigrationTitle, firstTitle, leadTitle, majoritiesTitle, partyName } from '@/lib/nowcast-copy';
 import { seatTotal } from '@/lib/nowcast-summary';
 import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
@@ -13,6 +13,8 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { Disclosure } from '@/components/viz/Disclosure';
 import { NowcastNav } from '@/components/nowcast/NowcastNav';
 import { NowcastSource, ProbRow } from '@/components/nowcast/parts';
+import { LeadHistogram } from '@/components/nowcast/LeadHistogram';
+import { ChartTable } from '@/components/viz/ChartTable';
 
 const PATH = '/eleicoes/proximas-legislativas/deputados';
 const SMALL = ['IL', 'L', 'CDU', 'BE', 'PAN'];
@@ -51,7 +53,8 @@ export default async function NowcastSeatsPage({ params }: { params: Promise<{ l
   const loc = pt ? 'pt' : 'en';
   const nowcast = await loadLegislativeNowcast();
   if (!nowcast.available) notFound();
-  const { file, seats, majorities, otherSums, twoThirds, patterns, leaderChange, patternYears, votes } = nowcast;
+  const { file, seats, majorities, otherSums, twoThirds, patterns, leaderChange, patternYears, votes, leadHistogram: leadHist } = nowcast;
+  const histOutcomes = leadHist ? [...Object.entries(seats.first).filter(([, p]) => p > 0).sort((a, b) => b[1] - a[1]).map(([p]) => p), ...(seats.tie > 0 ? ['tie'] : [])] : [];
   const { run, previous } = file;
   const longDate = (iso: string) => formatElectionLongDate(iso, locale);
   const shortDate = (iso: string) => formatElectionShortDate(iso, locale);
@@ -79,14 +82,33 @@ export default async function NowcastSeatsPage({ params }: { params: Promise<{ l
           meta={<span>{pt ? `Estimativa de ${shortDate(run.as_of)}, com sondagens até ${shortDate(run.last_poll)}` : `Estimate of ${shortDate(run.as_of)}, with polls up to ${shortDate(run.last_poll)}`}</span>}
         />
         <div className="mx-auto max-w-7xl space-y-10 px-4 py-6">
-          <section aria-label={pt ? 'Quem elege mais deputados' : 'Who wins the most seats'} className="max-w-2xl">
-            <table className="w-full border-collapse border-t border-ink">
-              <caption className="sr-only">{pt ? 'Hipóteses de cada partido eleger mais deputados do que qualquer outro.' : 'Each party’s chance of winning more seats than any other.'}</caption>
-              <tbody>
-                {ranked.map(([p, v]) => <ProbRow key={p} label={partyName(p)} parties={[p]} p={v} locale={locale} />)}
-                {seats.tie > 0 && <ProbRow label={pt ? 'Empate' : 'Tie'} p={seats.tie} locale={locale} />}
-              </tbody>
-            </table>
+          <section aria-labelledby="primeiro-titulo" className="max-w-3xl">
+            {leadHist ? (
+              <>
+                <h2 id="primeiro-titulo" className="text-[21px] leading-[27px] text-ink">{leadTitle(leadHist, loc)}</h2>
+                <div className="mt-3">
+                  <LeadHistogram h={leadHist} first={seats.first} tie={seats.tie} locale={locale} />
+                </div>
+                <ChartTable
+                  caption={pt ? 'Cenários por vantagem nos votos e quem elege mais deputados' : 'Scenarios by lead in votes and who wins most seats'}
+                  summaryLabel={pt ? 'Ver como tabela' : 'Show as a table'}
+                  columns={[pt ? 'Vantagem, pontos' : 'Lead, points', ...histOutcomes.map(o => (o === 'tie' ? (pt ? 'Empate' : 'Tie') : partyName(o))), pt ? 'Cenários' : 'Scenarios']}
+                  align={['left', ...histOutcomes.map(() => 'right' as const), 'right']}
+                  rows={leadHist.bins.map(b => {
+                    const n = Object.values(b.counts).reduce((x, y) => x + y, 0);
+                    return [`${b.x >= 0 ? '+' : '−'}${Math.abs(b.x)} ${pt ? 'a' : 'to'} ${b.x + 1 >= 0 ? '+' : '−'}${Math.abs(b.x + 1)}`, ...histOutcomes.map(o => (n ? `${Math.round((100 * (b.counts[o] ?? 0)) / n)}%` : '—')), String(n)];
+                  })}
+                />
+              </>
+            ) : (
+              <table className="w-full border-collapse border-t border-ink">
+                <caption className="sr-only">{pt ? 'Hipóteses de cada partido eleger mais deputados do que qualquer outro.' : 'Each party’s chance of winning more seats than any other.'}</caption>
+                <tbody>
+                  {ranked.map(([p, v]) => <ProbRow key={p} label={partyName(p)} parties={[p]} p={v} locale={locale} />)}
+                  {seats.tie > 0 && <ProbRow label={pt ? 'Empate' : 'Tie'} p={seats.tie} locale={locale} />}
+                </tbody>
+              </table>
+            )}
           </section>
 
           <Block kicker={pt ? 'Maioria absoluta, 116 deputados' : 'Absolute majority, 116 seats'} title={majoritiesTitle(majorities, loc)}>
