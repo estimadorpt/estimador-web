@@ -9,6 +9,7 @@ import { partyColors } from "@/lib/config/colors";
 import { compactTrendSeries, recentTrendRows, type TrendSeries } from "@/lib/election-aggregates";
 import { electionIntlLocale, formatElectionDate, formatElectionShortDate, sortByPartyOrder } from "@/lib/election-display";
 import { quietPlot } from "@/components/viz/plot-a11y";
+import { partyName } from '@/lib/nowcast-copy';
 
 interface TrendData {
   date: string;
@@ -28,6 +29,19 @@ interface PollingChartProps {
    * default; the live nowcast passes its central 90% interval (`hdi: false`).
    */
   band?: { percent: number; hdi: boolean };
+  /** The line above the chart on which parties carry a band; a page that says it elsewhere can drop it. */
+  showNote?: boolean;
+  /**
+   * The polls behind the line, one dot per poll and party, on the line's own
+   * base (the live nowcast passes them; the archive has none).
+   */
+  polls?: ReadonlyArray<{ date: string; party: string; share: number }>;
+  /**
+   * What each line's end label prints: its last value (the default), or the
+   * party alone, for a page whose own figures for today differ from the
+   * average's last value (the nowcast's include the shared polling error).
+   */
+  endLabels?: "value" | "party";
 }
 
 /** One party's value on one date, as Plot reads it. */
@@ -53,7 +67,7 @@ const day = (iso: string) => new Date(`${iso}T12:00:00Z`);
  * each other near the floor, so their lines go without, and the table holds
  * every party with its band.
  */
-export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true } }: PollingChartProps) {
+export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true }, showNote = true, polls, endLabels = "value" }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("forecast");
   const voteShareLabel = voteShareLabelProp ?? t("voteShareLabel");
@@ -116,11 +130,12 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
       const containerHeight = mobile ? 300 : 360;
 
       const drawn = points;
+      const pollDots = (polls ?? []).map(p => ({ date: day(p.date), party: p.party, share: p.share }));
       const withBand = drawn.filter(d => banded.includes(d.party) && d.low != null && d.high != null);
       const latest = drawn.filter(d => d.date.getTime() === day(series.dates[lastIndex]).getTime()).sort((a, b) => b.mean - a.mean);
 
       // Axis limit from what is drawn (bands included), plus a legible buffer.
-      const maxPlotted = Math.max(0.05, ...drawn.map(d => d.mean), ...withBand.map(d => d.high as number));
+      const maxPlotted = Math.max(0.05, ...drawn.map(d => d.mean), ...withBand.map(d => d.high as number), ...pollDots.map(d => d.share));
       const yMax = Math.min(1, Math.ceil((maxPlotted + 0.05) * 20) / 20);
       // End labels at their line's height, pushed apart by at least one
       // label's height (13px) where two lines end close together.
@@ -144,6 +159,8 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         Plot.gridX({ stroke: FURNITURE.grid, strokeWidth: 1 }),
         // The 94% HDI band of each drawn party, a light wash under its line.
         Plot.areaY(withBand, { x: "date", y1: "low", y2: "high", fill: "party", fillOpacity: 0.16, curve: "catmull-rom" }),
+        // Each poll, small and light under the lines: the average is read against them.
+        Plot.dot(pollDots, { x: "date", y: "share", fill: "party", r: mobile ? 1.8 : 2.4, fillOpacity: 0.45 }),
         Plot.line(drawn, { x: "date", y: "mean", stroke: "party", strokeWidth: mobile ? 2 : 2.5, curve: "catmull-rom" }),
         Plot.dot(latest, { x: "date", y: "mean", fill: "party", r: mobile ? 3 : 4, stroke: FURNITURE.surface, strokeWidth: mobile ? 1.5 : 2 }),
         // On a phone the tip is three short lines (party and value, band,
@@ -170,7 +187,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         Plot.text(labels, {
           x: "date",
           y: "ly",
-          text: (d: Point) => `${d.party} ${fmtPct(d.mean)}`,
+          text: (d: Point) => (endLabels === "party" ? partyName(d.party) : `${d.party} ${fmtPct(d.mean)}`),
           fill: FURNITURE.text,
           dx: mobile ? 6 : 8,
           fontSize: mobile ? 11 : 12,
@@ -217,15 +234,15 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     const resizeObserver = new ResizeObserver(() => setTimeout(render, 100));
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [points, series, lastIndex, voteShareLabel, locale, banded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [points, series, lastIndex, voteShareLabel, locale, banded, polls, endLabels]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full">
-      <p className="mb-2 text-xs text-graphite">
+      {showNote && <p className="mb-2 text-xs text-graphite">
         {pt
           ? `Todos os partidos, cada um com o nome ao fim da sua linha. A faixa clara (${band.percent}%) só nos três maiores: a dos outros sobrepor-se-ia junto ao fundo.`
           : `Every party, each named at the end of its line. The light band (${band.percent}%) on the three largest only: the others' would overlap near the floor.`}
-      </p>
+      </p>}
       <div ref={containerRef} />
       <ChartTable
         caption={`${voteShareLabel} · ${pt ? `estimativa e banda de ${band.percent}%${band.hdi ? " (HDI)" : ""}, todos os partidos` : `estimate and ${band.percent}%${band.hdi ? " HDI" : ""} band, every party`}`}

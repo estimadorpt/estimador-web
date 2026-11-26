@@ -27,7 +27,8 @@ import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/conf
 import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
 import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
 import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
-import { mostSeatsShares, NOWCAST_DIR, nowcastProblems, type NowcastFile } from '@/lib/legislative-nowcast';
+import { NOWCAST_DIR, nowcastProblems, seatSum, type NowcastFile } from '@/lib/legislative-nowcast';
+import { firstByPattern, leaderChangeShare, NOWCAST_EMIGRATION_PATTERNS, pollsterGaps, summariseNowcastSeats, voteShares } from '@/lib/nowcast-summary';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -153,19 +154,33 @@ export async function loadParliamentaryArchive() {
 
 export type ParliamentaryArchive = Awaited<ReturnType<typeof loadParliamentaryArchive>>;
 
-/** Seat groupings the nowcast states as arithmetic (never as a forecast of a government). */
-export const NOWCAST_SEAT_SUMS: ReadonlyArray<readonly string[]> = [
+/**
+ * Who could reach a majority without Chega, the question the page answers
+ * (a government with Chega is not on the table, so its sums are folded and
+ * never lead): the right without Chega, the left, and PS with AD.
+ */
+export const NOWCAST_MAJORITIES: ReadonlyArray<readonly string[]> = [
   ['AD', 'IL'],
+  ['PS', 'L', 'CDU', 'BE', 'PAN'],
+  ['PS', 'AD'],
+];
+/** The sums with Chega, stated as arithmetic in a fold. */
+export const NOWCAST_OTHER_SUMS: ReadonlyArray<readonly string[]> = [
   ['AD', 'CH'],
   ['AD', 'IL', 'CH'],
-  ['PS', 'L', 'CDU', 'BE'],
 ];
+/** The parliament bar's order, left to right. */
+export const NOWCAST_HOUSE_ORDER = ['BE', 'CDU', 'L', 'PAN', 'PS', 'AD', 'IL', 'CH'] as const;
+/** Two-thirds of the house: what a constitutional revision needs. */
+export const TWO_THIRDS = 154;
+/** The parties whose pollster gaps the Sondagens page shows. */
+export const NOWCAST_GAP_PARTIES = ['PS', 'CH', 'AD', 'IL'] as const;
 
 /**
  * The live legislative nowcast, summarised on the server like the archive:
  * the page gets the file's shares, trend and polls, and from the seat draws
- * (build-only) the most-seats shares, the party and bloc distributions and
- * the seat-sum arithmetic. `available` is false when a file is missing or
+ * (build-only) the most-seats shares, the party seat ranges, one parliament
+ * to draw and the seat sums. `available` is false when a file is missing or
  * fails `nowcastProblems`, and the page then says so instead of drawing zeros.
  */
 export async function loadLegislativeNowcast() {
@@ -181,24 +196,35 @@ export async function loadLegislativeNowcast() {
       console.error(`[nowcast] not drawn: ${problems.join('; ') || 'no seat draws'}`);
       return { available: false as const };
     }
+    // The headline seats use the emigration patterns the page names (NOWCAST_EMIGRATION_PATTERNS);
+    // the table of patterns and the leader-change share read all of them.
+    const kept = seatData.filter(d => NOWCAST_EMIGRATION_PATTERNS.includes(String(d.diaspora_scenario_applied)));
+    const draws = kept.length > 0 ? kept : seatData;
+    const order = NOWCAST_HOUSE_ORDER.filter(p => file.parties.includes(p));
+    const summary = summariseNowcastSeats(draws, order, 230);
+    const [recentA, recentB] = NOWCAST_EMIGRATION_PATTERNS;
     return {
       available: true as const,
       file,
       simulations: seatData.length,
-      mostSeats: mostSeatsShares(seatData, file.parties),
-      probabilities: {
-        rightMajority: calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold),
-        leftMajority: calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold),
+      draws: draws.length,
+      seats: summary,
+      parliament: summary.seats,
+      majorities: NOWCAST_MAJORITIES.map(parties => seatSum(draws, parties, majorityThreshold)),
+      otherSums: NOWCAST_OTHER_SUMS.map(parties => seatSum(draws, parties, majorityThreshold)),
+      twoThirds: {
+        centre: seatSum(draws, ['PS', 'AD'], TWO_THIRDS),
+        right: seatSum(draws, ['AD', 'CH', 'IL'], TWO_THIRDS),
+        // A third plus one is enough to block a constitutional revision on its own.
+        blocking: seatSum(draws, ['CH'], 230 - TWO_THIRDS + 1),
       },
-      seatSums: NOWCAST_SEAT_SUMS.map(parties => ({
-        parties,
-        ...seatSumArithmetic(seatData, parties, majorityThreshold),
-      })),
-      blocs: summariseBlocs(seatData, [
-        { key: 'left', parties: leftBlocParties },
-        { key: 'right', parties: rightBlocParties },
-      ], majorityThreshold),
-      seats: summariseSeats(seatData, PARLIAMENTARY_PARTIES),
+      votes: voteShares(file.national),
+      // The party most likely to reach 116 seats on its own, and how often it does.
+      singleMajority: order.map(p => ({ party: p, reach: seatSum(draws, [p], majorityThreshold).reach })).sort((a, b) => b.reach - a.reach)[0] ?? { party: '', reach: 0 },
+      patternYears: NOWCAST_EMIGRATION_PATTERNS.map(p => p.replace(/^S_/, '')),
+      patterns: firstByPattern(seatData, order),
+      leaderChange: recentA && recentB ? leaderChangeShare(seatData, recentA, recentB, order) : NaN,
+      gaps: pollsterGaps(file.polls, file.trend, file.parties, NOWCAST_GAP_PARTIES),
       districtForecast,
       contestedSeats,
     };

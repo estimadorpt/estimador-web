@@ -2,35 +2,22 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { createPageMetadata } from '@/lib/metadata';
 import { setRequestLocale } from '@/i18n/request-locale';
-import { leftBlocParties, majorityThreshold, rightBlocParties } from '@/lib/config/blocs';
-import { partyColors } from '@/lib/config/colors';
-import { loadLegislativeNowcast } from '@/lib/utils/data-loader';
-import { closeLeads } from '@/lib/election-aggregates';
-import {
-  formatElectionDate,
-  formatElectionLongDate,
-  formatElectionNumber,
-  formatElectionPercent,
-  formatElectionProbabilityText,
-  pollsterDisplayName,
-  sortByPartyOrder,
-} from '@/lib/election-display';
-import { partyWithArticle } from '@/lib/election-findings';
-import { rankedByMostSeats, weeklyFrom } from '@/lib/legislative-nowcast';
-import { formatSignedNumber } from '@/lib/typography';
+import { majorityThreshold } from '@/lib/config/blocs';
+import { PARLIAMENTARY_2025_SEATS } from '@/lib/config/elections';
+import { loadLegislativeNowcast, NOWCAST_HOUSE_ORDER } from '@/lib/utils/data-loader';
+import { formatElectionLongDate, formatElectionShortDate, formatElectionNumber, pollsterDisplayName } from '@/lib/election-display';
+import { governTitle, overviewLede, overviewTitle, partyName, pollsTitle } from '@/lib/nowcast-copy';
+import { seatTotal } from '@/lib/nowcast-summary';
+import { pollOutlet } from '@/lib/nowcast-polls';
 import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
-import { DataCard } from '@/components/viz/DataCard';
-import { ChartTable } from '@/components/viz/ChartTable';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { TextLink } from '@/components/brand/TextLink';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
-import { IntervalBand, ReadingRule, Register, Ruler } from '@/components/instrument';
-import { ProbabilityFigure } from '@/components/charts/ProbabilityFigure';
-import { PollingChart } from '@/components/charts/PollingChart';
-import { SeatChart } from '@/components/charts/SeatChart';
-import { CoalitionDotPlot } from '@/components/charts/CoalitionDotPlot';
-import { DistrictSummary } from '@/components/charts/DistrictSummary';
+import { ParliamentBar } from '@/components/charts/ParliamentBar';
+import { NowcastNav } from '@/components/nowcast/NowcastNav';
+import { NowcastSource, SeatKey, SeatTable, SumRow } from '@/components/nowcast/parts';
 
 const PATH = '/eleicoes/proximas-legislativas';
 
@@ -41,26 +28,22 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return createPageMetadata({
     locale,
     path: PATH,
-    title: pt ? 'Próximas legislativas: a estimativa diária' : 'Next parliamentary election: the daily estimate',
+    title: pt ? 'Próximas legislativas: deputados, votos e sondagens' : 'Next parliamentary election: seats, votes and polls',
     description: pt
-      ? 'Votos e mandatos se as legislativas fossem no dia da última sondagem, estimados a partir das sondagens publicadas desde maio de 2025.'
-      : 'Votes and seats if the parliamentary election were held on the day of the latest poll, estimated from the polls published since May 2025.',
+      ? 'Quantos deputados elegeria cada partido, com a margem de erro, quem pode governar e o que dizem as últimas sondagens. Atualizado a cada sondagem nova.'
+      : 'How many seats each party would win, with the margin of error, who could govern and what the latest polls say. Updated with every new poll.',
   });
 }
-
-const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
-const sectionTitleClass = 'text-2xl text-ink mb-3';
-/** The vote-share ruler, in percent: every modelled party's 90% range fits under 45%. */
-const SHARE_MAX = 45;
 
 export default async function LegislativeNowcastPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const pt = locale === 'pt';
+  const loc = pt ? 'pt' : 'en';
   const nowcast = await loadLegislativeNowcast();
   const back = { href: '/eleicoes/arquivo', label: t('nav.elections'), locale };
-  const eyebrow = pt ? 'Próximas legislativas · estimativa diária' : 'Next parliamentary election · daily estimate';
+  const eyebrow = pt ? 'Próximas legislativas · sem data marcada' : 'Next parliamentary election · no date set';
 
   if (!nowcast.available) {
     return (
@@ -83,312 +66,150 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
     );
   }
 
-  const { file, mostSeats, seatSums, blocs, seats, districtForecast, contestedSeats } = nowcast;
+  const { file, seats, majorities, otherSums, votes, singleMajority, patternYears } = nowcast;
   const { run, previous } = file;
-  const pct = (v: number) => formatElectionPercent(v, locale);
-  const prob = (p: number) => formatElectionProbabilityText(p, locale);
-  const count = (n: number) => formatElectionNumber(n, locale);
   const longDate = (iso: string) => formatElectionLongDate(iso, locale);
-  const lastPoll = longDate(run.last_poll);
-  const runDate = longDate(run.as_of);
-  const previousDate = longDate(previous.date);
-  const partyName = (party: string) => t(`parties.${party}`);
+  const shortDate = (iso: string) => formatElectionShortDate(iso, locale);
+  const count = (n: number) => formatElectionNumber(n, locale);
+  const prevYear = previous.date.slice(0, 4);
+  const prevMonth = new Date(`${previous.date}T12:00:00Z`).toLocaleDateString(pt ? 'pt-PT' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const firstPoll = [...file.polls].sort((a, b) => a.fieldwork_end.localeCompare(b.fieldwork_end))[0];
 
-  // The headline: the party with most seats in the most draws (ties count for no one).
-  const ranked = rankedByMostSeats(mostSeats.outright, file.parties);
-  const leader = ranked[0];
-  const finding = pt
-    ? `${partyWithArticle(leader, locale)} elegia mais deputados do que qualquer outro partido em ${prob(mostSeats.outright[leader])} das simulações`
-    : `${leader} would win more seats than any other party in ${prob(mostSeats.outright[leader])} of simulations`;
-  const tiles = ranked.slice(0, 3);
+  // Every party, most seats first: the seats, the 90% range, 2025 and the vote share.
+  const rows = [...seats.seats]
+    .sort((a, b) => b.seats - a.seats)
+    .map(s => ({ party: s.party, seats: s.seats, lo: seats.range[s.party].lo, hi: seats.range[s.party].hi, before: PARLIAMENTARY_2025_SEATS[s.party] ?? null, vote: votes[s.party] ?? 0 }));
+  const title = overviewTitle(rows.filter(r => r.before != null).map(r => ({ ...r, before: r.before! })), seats.first, loc);
+  const lede = overviewLede(rows.slice(0, 3), seats.first, singleMajority, prevMonth, loc);
 
-  const frame = {
-    updated: pt ? `Estimativa de ${runDate}, sondagens até ${lastPoll}` : `Estimate of ${runDate}, polls up to ${lastPoll}`,
-    methodologyHref: '#metodo',
-    methodologyLabel: pt ? 'Como lemos as sondagens' : 'How we read the polls',
-    locale,
+  // The latest polls, as published.
+  const latest = [...file.polls].sort((a, b) => b.fieldwork_end.localeCompare(a.fieldwork_end)).slice(0, 3);
+  const pollParties = file.parties;
+  const pollHeading = pollsTitle(latest.map(p => ({ name: pollsterDisplayName(p.pollster), shares: p.shares })), pollParties, loc);
+  const dayMonth = (iso: string) => shortDate(iso).replace(/\s\d{4}$/, '');
+  // "13 a 19 nov." in one month, "26 out. a 23 nov." across two ("13–19 Nov", "26 Oct–23 Nov").
+  const fieldwork = (start: string | null, end: string) => {
+    if (!start || start === end) return dayMonth(end);
+    const sameMonth = start.slice(0, 7) === end.slice(0, 7);
+    const from = sameMonth ? String(Number(start.slice(8, 10))) : dayMonth(start);
+    return pt ? `${from} a ${dayMonth(end)}` : `${from}–${dayMonth(end)}`;
   };
-  const simulationsSource = pt
-    ? `Fonte: modelo estimador.pt, ${count(nowcast.simulations)} simulações`
-    : `Source: estimador.pt model, ${count(nowcast.simulations)} simulations`;
-  const pollsSource = pt
-    ? `Fonte: modelo estimador.pt, ${count(file.polls.length)} sondagens desde ${previousDate}`
-    : `Source: estimador.pt model, ${count(file.polls.length)} polls since ${previousDate}`;
+  const pct = (v: number) => `${formatElectionNumber(v * 100, locale, Math.abs(v * 100 - Math.round(v * 100)) < 1e-6 ? 0 : 1)}%`;
 
-  const rightName = sortByPartyOrder(rightBlocParties).join(' + ');
-  const leftName = sortByPartyOrder(leftBlocParties).join(' + ');
-  const close = closeLeads(districtForecast);
-  const closeList = close.map(c => `${c.district} (${c.first.party} ${pct(c.first.share)}, ${c.second.party} ${pct(c.second.share)})`).join('; ');
-  const closeLeadNote = close.length > 0
-    ? (pt
-      ? `A menos de 1 ponto percentual entre os dois primeiros: ${closeList}. A contagem dá estes distritos ao partido à frente, mas a estimativa é praticamente um empate.`
-      : `Under 1 percentage point between the top two: ${closeList}. The count gives these districts to the party ahead, but the estimate is close to a tie.`)
-    : undefined;
-  const sharePoints = (v: number) => formatElectionNumber(v * 100, locale, 1);
-  const change = (party: string) => {
-    const row = file.national.find(r => r.party === party);
-    const before = previous.shares[party];
-    return row && before != null ? formatSignedNumber((row.median - before) * 100, locale, 1) : '—';
-  };
-  const pollParties = ['AD', 'PS', 'CH', 'IL', 'L', 'CDU', 'BE', 'PAN'];
+  // Who can govern without Chega, and the sums with it (folded: a coalition with Chega is not on the table).
+  const house = NOWCAST_HOUSE_ORDER.map(p => seats.seats.find(s => s.party === p)).filter((s): s is { party: string; seats: number } => s != null);
+  const groupLabel = (parties: readonly string[]) => (parties.length > 3 ? parties.map(partyName).join(', ').replace(/, ([^,]+)$/, pt ? ' e $1' : ' and $1') : parties.map(partyName).join(pt ? ' e ' : ' and '));
+  const emigrationNote = pt
+    ? `Votos em percentagem dos oito maiores partidos. Os 4 deputados da emigração repartidos como em ${patternYears.join(' e ')}.`
+    : `Votes as a share of the eight largest parties. The 4 emigration seats shared out as in ${patternYears.join(' and ')}.`;
+  const source = { polls: file.polls.length, from: longDate(firstPoll?.fieldwork_end ?? previous.date), to: longDate(run.last_poll), locale };
   const diag = run.diagnostics;
-  const weekly = weeklyFrom(file.trend.dates);
-  const spacing = weekly
-    ? (pt ? `semana a semana desde ${longDate(weekly)}, de quatro em quatro semanas antes` : `week by week since ${longDate(weekly)}, every fourth week before`)
-    : (pt ? 'semana a semana' : 'week by week');
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
-
       <main id="main-content" tabIndex={-1}>
+        <NowcastNav current="resumo" locale={locale} />
         <PageHero
           compact
           back={back}
           eyebrow={eyebrow}
-          title={finding}
-          lede={pt
-            ? `Não há eleições marcadas. Lemos as ${count(file.polls.length)} sondagens publicadas desde as legislativas de ${previousDate} e estimamos o resultado se a votação fosse no dia da última, ${lastPoll}. A estimativa volta a correr sempre que sai uma sondagem nova.`
-            : `No election has been called. We read the ${count(file.polls.length)} polls published since the ${previousDate} election and estimate the result if the vote were held on the day of the latest, ${lastPoll}. The estimate runs again whenever a new poll comes out.`}
-          meta={<span>{pt ? `Estimativa de ${runDate} · sondagens até ${lastPoll}` : `Estimate of ${runDate} · polls up to ${lastPoll}`}</span>}
+          title={title}
+          lede={lede}
+          meta={<span>{pt ? `Estimativa de ${shortDate(run.as_of)} · sondagens até ${shortDate(run.last_poll)}` : `Estimate of ${shortDate(run.as_of)} · polls up to ${shortDate(run.last_poll)}`}</span>}
         />
 
-        <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="border-b border-line">
-          <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm">
-            <a href="#votos" className={`tap-target ${linkClass}`}>{pt ? 'Votos' : 'Votes'}</a>
-            <a href="#tendencia" className={`tap-target ${linkClass}`}>{pt ? 'Desde 2025' : 'Since 2025'}</a>
-            <a href="#mandatos" className={`tap-target ${linkClass}`}>{pt ? 'Mandatos' : 'Seats'}</a>
-            <a href="#distritos" className={`tap-target ${linkClass}`}>{pt ? 'Distritos' : 'Districts'}</a>
-            <a href="#sondagens" className={`tap-target ${linkClass}`}>{pt ? 'Sondagens' : 'Polls'}</a>
-            <a href="#metodo" className={`tap-target ${linkClass}`}>{pt ? 'Método' : 'Method'}</a>
-          </div>
-        </nav>
+        <div className="mx-auto max-w-7xl space-y-10 px-4 py-6">
+          <section aria-label={pt ? 'Deputados e votos' : 'Seats and votes'} className="max-w-2xl">
+            <SeatTable rows={rows} locale={locale} sinceYear={prevYear} />
+            <SeatKey locale={locale} />
+            <NowcastSource {...source} note={emigrationNote} />
+          </section>
 
-        {/* Who has most seats: the three likeliest, then the seat sums as arithmetic. */}
-        <section id="estimativa" className="border-b border-line">
-          <div className="mx-auto max-w-7xl px-4 py-8">
-            <h2 className="sr-only">{pt ? 'Quem elege mais deputados' : 'Who wins most seats'}</h2>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-7 md:grid-cols-4">
-              {tiles.map(party => (
-                <div key={party} className="border-l border-line pl-4 first:border-0 first:pl-0">
-                  <ProbabilityFigure probability={mostSeats.outright[party]} locale={locale} className="mb-1 block font-display text-4xl font-extrabold tabular-nums text-ink" />
-                  <div className="text-sm text-graphite">{pt ? `${party} com mais mandatos` : `${party} with most seats`}</div>
-                </div>
-              ))}
-              <div className="border-l border-line pl-4">
-                <ProbabilityFigure probability={mostSeats.tie} locale={locale} className="mb-1 block font-display text-4xl font-extrabold tabular-nums text-ink" />
-                <div className="text-sm text-graphite">{pt ? 'Empate no primeiro lugar' : 'Tie for first place'}</div>
-              </div>
-            </div>
-            <div className="mt-8 max-w-3xl">
-              <Register
-                title={pt ? `Somas de mandatos (maioria: ${majorityThreshold} de 230)` : `Seat sums (majority: ${majorityThreshold} of 230)`}
-                items={seatSums.map(sum => ({
-                  label: sortByPartyOrder([...sum.parties]).join(' + '),
-                  value: pt
-                    ? `${count(sum.median)} mandatos (mediana); ${majorityThreshold} ou mais em ${prob(sum.reach)} das simulações`
-                    : `${count(sum.median)} seats (median); ${majorityThreshold} or more in ${prob(sum.reach)} of simulations`,
-                }))}
+          <section aria-labelledby="sondagens-titulo" className="max-w-2xl border-t border-ink pt-3">
+            <h2 id="sondagens-titulo" className="text-[21px] leading-[27px] text-ink">{pollHeading}</h2>
+            <p className="mt-1 text-[13.5px] text-graphite">{pt ? 'Como publicadas, com outros partidos e indecisos' : 'As published, with other parties and undecided voters'}</p>
+            <ul className="mt-2 border-t border-ink">
+              {latest.map(poll => {
+                const outlet = pollOutlet(poll.source_url);
+                const top = pollParties.filter(p => poll.shares[p] != null).sort((a, b) => (poll.shares[b] ?? 0) - (poll.shares[a] ?? 0)).slice(0, 3);
+                return (
+                  <li key={`${poll.pollster}-${poll.fieldwork_end}`} className="border-b border-grid py-2.5">
+                    <p className="text-[14.5px] text-ink">
+                      <span className="font-semibold">{pollsterDisplayName(poll.pollster)}{outlet ? (pt ? ` para ${outlet.pt}` : ` for ${outlet.en}`) : ''}</span>
+                      <span className="text-graphite"> · {fieldwork(poll.fieldwork_start, poll.fieldwork_end)}{poll.sample_size ? (pt ? `, ${count(poll.sample_size)} entrevistas` : `, ${count(poll.sample_size)} interviews`) : ''}</span>
+                    </p>
+                    <p className="mt-0.5 text-[14.5px] tabular-nums text-ink">{top.map(p => `${partyName(p)} ${pct(poll.shares[p])}`).join(' · ')}</p>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-3"><TextLink href={`${PATH}/sondagens`} locale={locale}>{pt ? `As ${count(file.polls.length)} sondagens e a evolução desde ${prevYear}` : `All ${count(file.polls.length)} polls and the trend since ${prevYear}`}</TextLink></p>
+          </section>
+
+          <section aria-labelledby="governar-titulo" className="max-w-2xl border-t border-ink pt-3">
+            <h2 id="governar-titulo" className="text-[21px] leading-[27px] text-ink">{governTitle(majorities, loc)}</h2>
+            <div className="mt-3">
+              <p className="mb-2 text-[12.5px] text-graphite">{pt ? 'Os 230 deputados, da esquerda para a direita' : 'The 230 seats, left to right'}</p>
+              <ParliamentBar
+                seats={house}
+                majority={majorityThreshold}
+                label={house.map(s => `${partyName(s.party)} ${s.seats}`).join(', ')}
+                majorityLabel={pt ? `${majorityThreshold} para a maioria` : `${majorityThreshold} for a majority`}
+                locale={locale}
               />
-              <p className="mt-3 text-xs text-graphite">{t('forecast.coalitionArithmeticNote')}</p>
+              <table className="mt-4 w-full border-collapse border-t border-ink">
+                <caption className="sr-only">{pt ? 'Deputados de cada soma de partidos sem o Chega, face aos 116 da maioria.' : 'Seats for each group of parties without Chega, against the 116 of a majority.'}</caption>
+                <tbody>
+                  {[...majorities].reverse().map(m => <SumRow key={m.parties.join('+')} parties={m.parties} label={groupLabel(m.parties)} total={seatTotal(seats.seats, m.parties)} locale={locale} />)}
+                </tbody>
+              </table>
+              <Disclosure summary={pt ? 'E com o Chega?' : 'And with Chega?'} className="mt-1">
+                <table className="w-full border-collapse">
+                  <caption className="sr-only">{pt ? 'Somas de deputados com o Chega.' : 'Seat sums with Chega.'}</caption>
+                  <tbody>
+                    {otherSums.map(m => <SumRow key={m.parties.join('+')} parties={m.parties} label={groupLabel(m.parties)} total={seatTotal(seats.seats, m.parties)} locale={locale} />)}
+                  </tbody>
+                </table>
+              </Disclosure>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="py-8">
-          <div className="mx-auto max-w-7xl space-y-12 px-4">
-            <div id="votos">
-              <h2 className={sectionTitleClass}>{pt ? `Votos no dia da última sondagem, ${lastPoll}` : `Votes on the day of the latest poll, ${lastPoll}`}</h2>
-              <DataCard
-                title={pt ? 'Percentagem de votos estimada, por partido' : 'Estimated vote share, by party'}
-                subtitle={pt
-                  ? `Mediana e intervalo de 90%, com o erro que todas as sondagens podem partilhar no dia da votação. O quadrado é o resultado das legislativas de ${previousDate}. Percentagens dos votos nos oito partidos modelados, sem os restantes.`
-                  : `Median and 90% interval, including the error all polls can share on election day. The square is the ${previousDate} result. Shares of the vote for the eight modelled parties, without the others.`}
-                source={pollsSource}
-                {...frame}
-              >
-                <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Votos por partido' : 'Votes by party'}>
-                  <table className="w-full border-collapse text-[14px]">
-                    <caption className="sr-only">
-                      {pt
-                        ? `Percentagem de votos estimada por partido (mediana e intervalo de 90%), resultado de ${previousDate} e variação da mediana em pontos.`
-                        : `Estimated vote share by party (median and 90% interval), the ${previousDate} result and the change in the median, in points.`}
-                    </caption>
-                    <thead>
-                      <tr className="border-b border-ink text-left align-bottom text-[12.5px] leading-4 text-graphite">
-                        <th scope="col" className="pb-1.5 pr-2 font-medium">{pt ? 'Partido' : 'Party'}</th>
-                        <th scope="col" className="pb-1.5 pr-2 text-right font-medium">{pt ? 'Mediana' : 'Median'}</th>
-                        <th scope="col" className="hidden pb-1.5 pr-2 text-right font-medium sm:table-cell">{pt ? 'Intervalo de 90%' : '90% interval'}</th>
-                        <th scope="col" className="w-[38%] min-w-[130px] pb-1.5 pr-3 font-medium">
-                          <span className="sr-only">{pt ? 'Intervalo e resultado anterior' : 'Interval and previous result'}</span>
-                          <Ruler min={0} max={SHARE_MAX} minor={1} major={5} labels={[0, 10, 20, 30, 40]} unit="%" />
-                        </th>
-                        <th scope="col" className="hidden pb-1.5 pr-2 text-right font-medium md:table-cell">{previous.date.slice(0, 4)}</th>
-                        <th scope="col" className="pb-1.5 text-right font-medium">{pt ? 'Variação (p.p.)' : 'Change (pp)'}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {file.national.map(r => (
-                        <tr key={r.party} className="border-b border-grid">
-                          <th scope="row" className="py-1.5 pr-2 text-left font-normal">
-                            <span className="name-cut inline-flex items-center gap-[7px] whitespace-nowrap">
-                              <i aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: partyColors[r.party as keyof typeof partyColors] }} />
-                              <abbr title={partyName(r.party)} className="no-underline">{r.party}</abbr>
-                            </span>
-                          </th>
-                          <td className="py-1.5 pr-2 text-right"><span className="fig text-[19px] leading-6">{pct(r.median)}</span></td>
-                          <td className="hidden whitespace-nowrap py-1.5 pr-2 text-right text-graphite sm:table-cell">{sharePoints(r.lo90)}–{sharePoints(r.hi90)}</td>
-                          <td className="py-1.5 pr-3">
-                            <IntervalBand lo={r.lo90 * 100} md={r.median * 100} hi={r.hi90 * 100} min={0} max={SHARE_MAX} now={previous.shares[r.party] != null ? previous.shares[r.party] * 100 : null} />
-                            <span className="mt-0.5 block whitespace-nowrap text-[12.5px] text-graphite sm:hidden">{sharePoints(r.lo90)}–{sharePoints(r.hi90)}</span>
-                          </td>
-                          <td className="hidden py-1.5 pr-2 text-right text-graphite md:table-cell">{previous.shares[r.party] != null ? pct(previous.shares[r.party]) : '—'}</td>
-                          <td className="py-1.5 text-right">{change(r.party)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          <section id="metodo" aria-label={pt ? 'Como fazemos' : 'How we do it'} className="border-t border-ink pt-2">
+            <Disclosure summary={pt ? 'Como fazemos esta estimativa' : 'How this estimate is made'}>
+              <div className="mt-2 grid max-w-5xl gap-6 text-sm text-graphite md:grid-cols-3">
+                <div>
+                  <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Todas as sondagens, semana a semana' : 'Every poll, week by week'}</h3>
+                  <p>
+                    {pt
+                      ? 'Cada partido segue um passeio aleatório semana a semana: a estimativa de cada semana parte da anterior e move-se com as sondagens novas. Cada empresa tem o seu desvio habitual, estimado em todas as sondagens desde 2009, e lemos cada sondagem descontado esse desvio. O rastreio da Pitagórica junta quatro semanas de entrevistas: contamos só as novas de cada edição.'
+                      : 'Each party follows a weekly random walk: each week’s estimate starts from the one before and moves with the new polls. Each firm has its own usual lean, estimated from every poll since 2009, and each poll is read net of it. Pitagórica’s tracker pools four weeks of interviews: we count only each release’s new ones.'}
+                  </p>
                 </div>
-                <p className="mt-2 text-[12.5px] leading-[17px] text-graphite">
-                  <ReadingRule locale={locale} variant="short" marks={['now', 'band']} />
-                </p>
-              </DataCard>
-            </div>
-
-            <div id="tendencia">
-              <h2 className={sectionTitleClass}>{pt ? `As sondagens desde as legislativas de ${previousDate}` : `The polls since the ${previousDate} election`}</h2>
-              <DataCard
-                title={pt ? 'Média das sondagens estimada pelo modelo, por partido' : 'The model’s poll average, by party'}
-                subtitle={pt
-                  ? `Onde estão as sondagens, ${spacing}, descontado o desvio próprio de cada empresa: média e intervalo de 90%. A faixa não inclui o erro que todas as sondagens podem partilhar no dia da votação, por isso é mais estreita do que os intervalos acima. O primeiro ponto é a semana das legislativas de ${previousDate}, ajustada ao resultado.`
-                  : `Where the polls stand, ${spacing}, net of each firm’s own lean: mean and 90% interval. The band leaves out the error all polls can share on election day, so it is narrower than the intervals above. The first point is the week of the ${previousDate} election, fitted to the result.`}
-                source={pollsSource}
-                {...frame}
-              >
-                <PollingChart series={{ dates: file.trend.dates, parties: file.trend.parties }} voteShareLabel={t('forecast.voteShareLabel')} band={{ percent: Math.round(file.trend.interval * 100), hdi: false }} />
-              </DataCard>
-            </div>
-
-            <div id="mandatos">
-              <h2 className={sectionTitleClass}>{pt ? 'Mandatos por partido' : 'Seats by party'}</h2>
-              <DataCard
-                title={pt ? 'Mandatos por partido, em todas as simulações' : 'Seats by party, across every simulation'}
-                subtitle={t('forecast.simulationDescription', { count: count(nowcast.simulations) })}
-                source={simulationsSource}
-                {...frame}
-              >
-                <SeatChart stats={seats} tableCaption={t('forecast.projectedSeatsByParty')} />
-              </DataCard>
-            </div>
-
-            <div>
-              <h2 className={sectionTitleClass}>{pt
-                ? `${rightName} chega aos ${majorityThreshold} mandatos em ${prob(nowcast.probabilities.rightMajority)} das simulações; ${leftName}, em ${prob(nowcast.probabilities.leftMajority)}`
-                : `${rightName} reaches ${majorityThreshold} seats in ${prob(nowcast.probabilities.rightMajority)} of simulations; ${leftName}, in ${prob(nowcast.probabilities.leftMajority)}`}</h2>
-              <DataCard
-                title={pt ? 'Mandatos de cada bloco, simulação a simulação' : 'Each bloc’s seats, simulation by simulation'}
-                subtitle={pt
-                  ? `${t('forecast.coalitionDescription')} ${t('forecast.coalitionArithmeticNote')}`
-                  : `${t('forecast.coalitionDescription')} ${t('forecast.coalitionArithmeticNote')}`}
-                source={simulationsSource}
-                {...frame}
-              >
-                <CoalitionDotPlot
-                  simulations={blocs}
-                  leftCoalitionLabel={leftName}
-                  rightCoalitionLabel={rightName}
-                  projectedSeatsLabel={t('forecast.projectedSeats')}
-                  majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
-                  showingOutcomesLabel={t.raw('forecast.drawnSimulations') as string}
-                  tableCaption={t('forecast.projectedSeatsByBloc')}
-                />
-              </DataCard>
-            </div>
-
-            <div id="distritos">
-              <h2 className={sectionTitleClass}>{t('forecast.districtAnalysis')}</h2>
-              <DataCard
-                title={pt ? 'Mandatos em disputa e partido à frente, por distrito' : 'Seats in play and the party ahead, by district'}
-                subtitle={pt
-                  ? `Cada distrito parte do seu resultado de ${previousDate} e acompanha a variação nacional (metade proporcional, metade uniforme). Os quatro mandatos da emigração seguem os resultados de 2019, 2022, 2024 e 2025 nessas duas circunscrições, um quarto das simulações cada.`
-                  : `Each district starts from its ${previousDate} result and follows the national change (half proportional, half uniform). The four emigration seats follow the 2019, 2022, 2024 and 2025 results in those two constituencies, a quarter of the simulations each.`}
-                source={simulationsSource}
-                {...frame}
-              >
-                <DistrictSummary
-                  districtData={districtForecast}
-                  contestedData={contestedSeats}
-                  closeLeadNote={closeLeadNote}
-                  headingLevel={4}
-                  seatChangeBaseline={pt
-                    ? `Os +1 e −1 comparam cada partido com o seu próprio número de mandatos mais frequente nesse distrito, nas simulações, e não com ${previous.date.slice(0, 4)}, e incluem os casos de dois mandatos ou mais. Como cada partido é comparado com o seu valor, os ganhos e as perdas de um distrito não têm de se compensar: quando um mandato se divide quase a meias entre dois partidos, cada um pode aparecer com +1 ou −1, conforme o seu valor mais frequente.`
-                    : `The +1 and −1 compare each party with its own most frequent seat count in that district across the simulations, not with ${previous.date.slice(0, 4)}, and include two seats or more. Because each party is compared with its own count, a district’s gains and losses need not balance: when a seat is split almost evenly between two parties, each can show +1 or −1, depending on its own most frequent count.`}
-                />
-              </DataCard>
-            </div>
-
-            <div id="sondagens">
-              <h2 className={sectionTitleClass}>{pt ? `${count(file.polls.length)} sondagens desde as legislativas de ${previousDate}` : `${count(file.polls.length)} polls since the ${previousDate} election`}</h2>
-              <DataCard
-                title={pt ? 'As sondagens que o modelo leu, da mais recente para a mais antiga' : 'The polls the model read, newest first'}
-                subtitle={pt
-                  ? 'Percentagens como publicadas por cada empresa, sobre o total da própria sondagem (outros partidos incluídos). O rastreio semanal da Pitagórica junta quatro semanas de entrevistas: o modelo conta só as entrevistas novas de cada edição.'
-                  : 'Shares as each firm published them, out of the poll’s own total (other parties included). Pitagórica’s weekly tracker pools four weeks of interviews: the model counts only each release’s new interviews.'}
-                source={pt ? 'Fonte: sondagens publicadas na comunicação social, compiladas pela Wikipedia' : 'Source: polls published in the press, as compiled by Wikipedia'}
-                {...frame}
-              >
-                <ChartTable
-                  caption={pt ? 'Sondagens desde as últimas legislativas' : 'Polls since the last parliamentary election'}
-                  summaryLabel={pt ? `Ver as ${count(file.polls.length)} sondagens` : `Show the ${count(file.polls.length)} polls`}
-                  columns={[pt ? 'Empresa' : 'Pollster', pt ? 'Fim do trabalho de campo' : 'Fieldwork end', pt ? 'Amostra' : 'Sample', ...pollParties]}
-                  align={['left', 'left', 'right', ...pollParties.map(() => 'right' as const)]}
-                  rows={file.polls.map(poll => [
-                    pollsterDisplayName(poll.pollster),
-                    formatElectionDate(poll.fieldwork_end, locale),
-                    poll.sample_size != null ? count(poll.sample_size) : '—',
-                    ...pollParties.map(p => (poll.shares[p] != null ? sharePoints(poll.shares[p]) : '—')),
-                  ])}
-                />
-              </DataCard>
-            </div>
-          </div>
-        </section>
-
-        <section id="metodo" className="pb-8">
-          <div className="mx-auto max-w-7xl px-4">
-            <h2 className="mb-4 border-b border-ink pb-2 text-2xl text-ink">{pt ? 'Como lemos as sondagens' : 'How we read the polls'}</h2>
-            <div className="grid gap-6 text-sm text-graphite md:grid-cols-3">
-              <div>
-                <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Uma média com memória' : 'An average with memory'}</h3>
-                <p>
-                  {pt
-                    ? 'Cada partido segue um passeio aleatório semana a semana: a estimativa de cada semana parte da anterior e move-se com as sondagens novas. Cada empresa tem o seu desvio próprio, estimado em todas as sondagens desde 2009, e as sondagens são lidas descontado esse desvio. Não corrigimos a média em nenhuma direção.'
-                    : 'Each party follows a weekly random walk: each week’s estimate starts from the one before and moves with the new polls. Each firm has its own lean, estimated from every poll since 2009, and the polls are read net of it. We do not shift the average in any direction.'}
-                </p>
+                <div>
+                  <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'O erro que todas as sondagens partilham' : 'The error all polls share'}</h3>
+                  <p>
+                    {pt
+                      ? 'No dia da votação, as sondagens podem errar todas para o mesmo lado: em 2025 deram ao Chega 18,4% em média, e teve 22,8%. Juntamos um erro desse tamanho, medido nas legislativas de 2011 a 2025; é por isso que as margens são largas. A direção do erro não se repetiu de uma eleição para a seguinte, por isso não a corrigimos.'
+                      : 'On election day the polls can all miss the same way: in 2025 they gave Chega 18.4% on average, and it won 22.8%. We add an error of that size, measured over the parliamentary elections from 2011 to 2025, which is why the margins are wide. Its direction did not repeat from one election to the next, so we do not correct for it.'}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Dos votos aos deputados' : 'From votes to seats'}</h3>
+                  <p>
+                    {pt
+                      ? `Cada cenário parte do resultado de ${prevYear} em cada círculo, segue a variação nacional e aplica o método de Hondt. Os 4 deputados da emigração repartem-se como em ${patternYears.join(' ou como em ')}, metade dos cenários cada. O JPP, que elegeu 1 deputado em ${prevYear}, não é estimado. Só publicamos quando a amostragem converge em todos os ${count(diag.n_values)} valores do modelo (r-hat até 1,01, amostra efetiva de 400 ou mais); nesta, o r-hat máximo foi ${formatElectionNumber(diag.max_rhat, locale, 3)}.`
+                      : `Each scenario starts from each district’s ${prevYear} result, follows the national change and applies the D’Hondt method. The 4 emigration seats are shared out as in ${patternYears.join(' or as in ')}, half the scenarios each. JPP, which won 1 seat in ${prevYear}, is not modelled. We publish only when the sampler converges on all ${count(diag.n_values)} values in the model (r-hat up to 1.01, effective sample of 400 or more); this run’s highest r-hat was ${formatElectionNumber(diag.max_rhat, locale, 3)}.`}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Um erro que todas as sondagens partilham' : 'An error all polls share'}</h3>
-                <p>
-                  {pt
-                    ? 'No dia da votação, as sondagens podem errar todas para o mesmo lado: em 2025 deram ao Chega 18,4% em média, e teve 22,8%. Juntamos um erro desse tamanho, medido nas seis legislativas de 2011 a 2025, e é por isso que os intervalos são largos. Nesse teste, a direção do erro não se repetiu de forma fiável de uma eleição para a seguinte, por isso não a corrigimos.'
-                    : 'On election day, the polls can all miss the same way: in 2025 they gave Chega 18.4% on average, and it won 22.8%. We add an error of that size, measured over the six parliamentary elections from 2011 to 2025, which is why the intervals are wide. In that test the direction of the miss did not repeat reliably from one election to the next, so we do not correct for it.'}
-                </p>
+              <div className="mt-4 flex flex-wrap gap-x-6">
+                <TextLink href="/eleicoes/metodologia" locale={locale}>{pt ? 'Como fizemos as previsões arquivadas' : 'How the archived forecasts were made'}</TextLink>
+                <TextLink href="/eleicoes/legislativas" locale={locale}>{pt ? 'A previsão de 2025 (arquivo)' : 'The 2025 forecast (archive)'}</TextLink>
               </div>
-              <div>
-                <h3 className="mb-2 text-base font-semibold text-ink">{pt ? 'Dos votos aos mandatos' : 'From votes to seats'}</h3>
-                <p>
-                  {pt
-                    ? `Cada simulação reparte os votos pelos distritos a partir de ${previousDate}, com o ruído medido nas eleições anteriores, e aplica o método de Hondt em cada um. Publicamos uma atualização só se a amostragem convergir em todos os ${count(diag.n_values)} valores do modelo (r-hat até 1,01, amostra efetiva de 400 ou mais). Esta: r-hat máximo ${formatElectionNumber(diag.max_rhat, locale, 3)}, amostra efetiva mínima ${count(Math.floor(Math.min(diag.min_ess_bulk, diag.min_ess_tail)))}.`
-                    : `Each simulation shares the vote out across the districts from ${previousDate}, with the noise measured in earlier elections, and applies the D’Hondt method in each. We publish an update only if the sampler converged on all ${count(diag.n_values)} values in the model (r-hat up to 1.01, effective sample of 400 or more). This one: highest r-hat ${formatElectionNumber(diag.max_rhat, locale, 3)}, lowest effective sample ${count(Math.floor(Math.min(diag.min_ess_bulk, diag.min_ess_tail)))}.`}
-                </p>
-              </div>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-x-6">
-              <TextLink href="/eleicoes/metodologia" locale={locale}>{pt ? 'Como fizemos as previsões arquivadas' : 'How the archived forecasts were made'}</TextLink>
-              <TextLink href="/eleicoes/legislativas" locale={locale}>{pt ? 'A previsão de 2025 (arquivo)' : 'The 2025 forecast (archive)'}</TextLink>
-            </div>
-          </div>
-        </section>
+            </Disclosure>
+          </section>
+        </div>
       </main>
       <SiteFooter locale={locale} />
     </div>
