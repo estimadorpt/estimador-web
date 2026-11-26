@@ -745,33 +745,42 @@ All chart components follow a consistent pattern:
 
 ### Live legislative nowcast
 
-`/eleicoes/proximas-legislativas` (`src/app/[locale]/eleicoes/proximas-legislativas/page.tsx`, copy
-inline in pt/en) reads `loadLegislativeNowcast()` (`data-loader.ts`): `nowcast.json` (run facts and
-diagnostics, national shares with 50% and 90% ranges, the 2025 result over the eight modelled
-parties, the weekly poll average since the election, the polls as published), the build-only seat
-draws, `district_forecast.json` and `contested_summary.json`. Types, `mostSeatsShares` (ties count
-for no one), `weeklyFrom` and `nowcastProblems` live in `src/lib/legislative-nowcast.ts`;
-`validate-data` applies the same rules, so a bad file stops the deploy and the last good estimate
-stays online. The files come from estimador-elections (`src/export_nowcast_web.py`), pushed to
-`main` by `pt.estimador.nowcast` on the Mac (`scripts/nowcast_daily.sh`, runbook
-`docs/live_nowcast.md` there): every hour it checks the poll feed and refits only when it holds new
-polls. Data-only pushes: every date, number and finding on the page and in the homepage's elections
-channel is read from the files, never typed, and no test pins a value. Structure (a tracker, after the
-owner's review of 24-25 November 2026; the case is in the review doc linked from the project thread): the
-h1 is the vote shares readers know from the news ("PS 30%, Chega 27%, AD 25%: três partidos em 5
-pontos"), the lede the poll count and the largest move in four weeks (`recentMove`); one scoreboard
-(votes and seats, each with its 90% margin in small type and the change since 2025, in ink only when
-the margin leaves out the 2025 value; seats against `PARLIAMENTARY_2025_SEATS` in `config/elections.ts`);
-the poll average since the election with every poll as a dot on the model's eight-party base
-(`onModelBase`; its band leaves out the shared polling error); one parliament bar (`ParliamentBar`,
-mean seats by largest remainder, `parliamentSeats`; the scoreboard and the sums print the bar's count, so they add up, with ranges and shares from the draws) and who reaches 116 without Chega (`NOWCAST_MAJORITIES`:
-AD + IL, the left, PS + AD; owner: a coalition with Chega is close to impossible, so the sums with Chega
-are folded and never lead), with who comes first as "6 de cada 10 cenários"; the latest five polls as
-published, the heading naming the newest one that disagrees with the average; districts and the method
-folded at the end. Readers compare our shares with published polls and the 2025 result, so the page
-says once that the shares are over the eight largest parties and that 2025 leaves out the emigration
-vote (the export's `previous.shares` is territory-only). Keep the text short: the owner reads it on a
-phone. Every heading is a finding built from the files, with fallbacks. No share card of its own yet (it uses the elections/brand card).
+`/eleicoes/proximas-legislativas` and its tabs `/sondagens`, `/deputados` and `/circulos` (`src/app/[locale]/eleicoes/proximas-legislativas/`,
+copy inline in pt/en; the tab row is `NowcastNav`, `src/components/nowcast/NowcastNav.tsx`, Liga Portugal's look) read
+`loadLegislativeNowcast()` (`data-loader.ts`): `nowcast.json` (run facts and diagnostics, national shares with 50% and 90%
+ranges, the 2025 result over the eight modelled parties, the weekly trend since the election, the polls as published), the
+build-only seat draws, `district_forecast.json` and `contested_summary.json`. `validate-data` applies `nowcastProblems`, so a
+bad file stops the deploy and the last good estimate stays online. The files come from estimador-elections
+(`src/export_nowcast_web.py`), pushed to `main` by `pt.estimador.nowcast` on the Mac (`scripts/nowcast_daily.sh`, runbook
+`docs/live_nowcast.md` there). Data-only pushes: every date, number and heading is read from the files, never typed, and no
+test pins a value.
+
+- **It is an estimate, not a poll average** (owner, 25 Nov 2026): never call it "média das sondagens". Copy reads like a
+  Portuguese newspaper, not like model output: no "simulações", no compressed stat-speak, no explanatory disclaimer
+  paragraphs (uncertainty is the band plus a one-line key).
+- **The figures** (`src/lib/nowcast-summary.ts`): seats use the emigration patterns in `NOWCAST_EMIGRATION_PATTERNS`
+  (2024 and 2025, the owner's choice; the 2019 and 2022 patterns give Chega none of the four seats abroad); mean seats filled
+  to 230 by largest remainder (`summariseNowcastSeats`), 90% ranges, first place (ties apart); vote shares are the means
+  rounded to add to 100,0 (`voteShares`, among the eight modelled parties, said so in the source line); `firstByPattern` and
+  `leaderChangeShare` (how often the 2024 and 2025 patterns change the winner); `pollsterGaps` (each poll against the trend in
+  the week its fieldwork ended, on the parties it reports; a firm with three or more polls of 20+ days' fieldwork is a
+  tracker, counted apart).
+- **The headings** (`src/lib/nowcast-copy.ts`): each is a rule over those figures with a fallback (`overviewTitle`,
+  `overviewLede`, `governTitle`, `pollsTitle`, `trendTitle`, `gapTitle`, `firstTitle`, `majoritiesTitle`, `emigrationTitle`;
+  `nowcast-copy.test.ts` holds the wording on fixtures, never on the live files). `partyName` writes Chega and Livre in full
+  (the seat bar and the trend's end labels use it too). Poll outlets come from the source link only when it is the outlet's own
+  site (`src/lib/nowcast-polls.ts`).
+- **Resumo**: the h1 (who leads on seats, the largest change the margin does not cover), the standfirst (top three seats, the
+  majority, the odds of first place in words), the seat table (`SeatTable`: seats, 90% band with the 2025 square and the 116
+  line for parties of 20 seats or more, the change since 2025, the vote share), the three latest polls as published, who can
+  govern without Chega (`ParliamentBar` and the sums; the sums with Chega folded under "E com o Chega?", owner: a coalition with
+  Chega is close to impossible, so they never lead), the method folded at `#metodo`.
+- **Sondagens**: the trend since 2025 with every poll as a dot, how each pollster compares with the estimate, every poll.
+- **Deputados**: first place, majorities, two-thirds (and Chega's blocking third), the sums with Chega folded, the emigration
+  patterns, the small parties against proportionality.
+- **Círculos**: the existing `DistrictSummary` until the export carries district seat draws (planned: the contested seat in
+  each district, as in the owner's mock of 26 Nov 2026).
+- The homepage's elections channel shows the same estimated seats (`home.nowcastFinding`).
 
 ### Election Chart Components (`src/components/charts/`)
 - **HouseEffects.tsx**: Custom HTML/CSS matrix with no hover tooltip (an exception to the hover-tip rule above): each cell's `title` and the `<ChartTable>` twin carry the exact values; the cell colours come from `src/lib/election-heatmap.ts` (one forest ink on every cell, the red and blue ramps capped where it still reaches 4.5:1, `election-heatmap.test.ts` sweeps them)

@@ -1,4 +1,5 @@
 import { partyColors } from '@/lib/config/colors';
+import { partyName } from '@/lib/nowcast-copy';
 
 /** Narrower than this many seats, a segment's name goes in the key below instead of on the bar. */
 const LABEL_MIN_SEATS = 14;
@@ -48,7 +49,7 @@ export function ParliamentBar({ seats, majority, label, majorityLabel, locale }:
             >
               {s.seats >= LABEL_MIN_SEATS && (
                 <span className="px-0.5 text-center text-[12.5px] font-semibold leading-4" style={{ color: textOn(partyColors[s.party as keyof typeof partyColors] ?? '#5e5e5e') }}>
-                  {s.party}<br />{s.seats.toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT')}
+                  {partyName(s.party)}<br />{s.seats.toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT')}
                 </span>
               )}
             </div>
@@ -63,7 +64,7 @@ export function ParliamentBar({ seats, majority, label, majorityLabel, locale }:
           {narrow.map(s => (
             <span key={s.party} className="inline-flex items-center gap-1.5 whitespace-nowrap">
               <i className="inline-block h-2.5 w-2.5" style={{ background: partyColors[s.party as keyof typeof partyColors] }} />
-              {s.party} {s.seats}
+              {partyName(s.party)} {s.seats}
             </span>
           ))}
         </p>

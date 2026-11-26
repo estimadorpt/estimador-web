@@ -293,7 +293,7 @@
     "economyAction": "See the reading and evidence",
     "nowcastTitle": "Next parliamentary election",
     "nowcastDate": "estimate of {date}, polls up to {poll}",
-    "nowcastFinding": "Poll average: {shares}",
+    "nowcastFinding": "Estimated seats: {seats}",
     "nowcastNote": "No election has been called: this is the result the polls pointed to if the vote were held on the day of the latest.",
     "nowcastOpen": "See the estimate",
     "electionsKicker": "Elections",

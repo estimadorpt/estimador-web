@@ -9,6 +9,7 @@ import { partyColors } from "@/lib/config/colors";
 import { compactTrendSeries, recentTrendRows, type TrendSeries } from "@/lib/election-aggregates";
 import { electionIntlLocale, formatElectionDate, formatElectionShortDate, sortByPartyOrder } from "@/lib/election-display";
 import { quietPlot } from "@/components/viz/plot-a11y";
+import { partyName } from '@/lib/nowcast-copy';
 
 interface TrendData {
   date: string;
@@ -186,7 +187,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         Plot.text(labels, {
           x: "date",
           y: "ly",
-          text: (d: Point) => (endLabels === "party" ? d.party : `${d.party} ${fmtPct(d.mean)}`),
+          text: (d: Point) => (endLabels === "party" ? partyName(d.party) : `${d.party} ${fmtPct(d.mean)}`),
           fill: FURNITURE.text,
           dx: mobile ? 6 : 8,
           fontSize: mobile ? 11 : 12,
