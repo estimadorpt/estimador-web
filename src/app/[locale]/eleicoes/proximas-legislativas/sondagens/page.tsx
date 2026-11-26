@@ -99,7 +99,7 @@ export default async function NowcastPollsPage({ params }: { params: Promise<{ l
               <tbody>
                 {gapRows.map(g => (
                   <tr key={`${g.name}-${g.tracking}`} className="border-b border-grid">
-                    <th scope="row" className="py-1.5 text-left font-normal text-ink">{g.name} <span className="text-graphite">({g.tracking ? (pt ? `tracking, ${count(g.polls)} vagas` : `tracker, ${count(g.polls)} waves`) : count(g.polls)})</span></th>
+                    <th scope="row" className="py-1.5 text-left font-normal text-ink">{g.name}{!g.tracking && gapRows.some(o => o.name === g.name && o.tracking) ? (pt ? ', avulsas' : ', one-off') : ''} <span className="text-graphite">({g.tracking ? (pt ? `tracking, ${count(g.polls)} vagas` : `tracker, ${count(g.polls)} waves`) : count(g.polls)})</span></th>
                     {NOWCAST_GAP_PARTIES.map(p => <td key={p} className="py-1.5 pl-3 text-right tabular-nums text-ink">{signed(g.gap[p])}</td>)}
                   </tr>
                 ))}

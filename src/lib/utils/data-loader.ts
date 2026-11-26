@@ -219,8 +219,8 @@ export async function loadLegislativeNowcast() {
         blocking: seatSum(draws, ['CH'], 230 - TWO_THIRDS + 1),
       },
       votes: voteShares(file.national),
-      // The best chance any single party has of 116 seats on its own.
-      singleMajority: Math.max(...order.map(p => seatSum(draws, [p], majorityThreshold).reach)),
+      // The party most likely to reach 116 seats on its own, and how often it does.
+      singleMajority: order.map(p => ({ party: p, reach: seatSum(draws, [p], majorityThreshold).reach })).sort((a, b) => b.reach - a.reach)[0] ?? { party: '', reach: 0 },
       patternYears: NOWCAST_EMIGRATION_PATTERNS.map(p => p.replace(/^S_/, '')),
       patterns: firstByPattern(seatData, order),
       leaderChange: recentA && recentB ? leaderChangeShare(seatData, recentA, recentB, order) : NaN,

@@ -28,12 +28,14 @@ const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
 const FRACTIONS: Array<[number, string, string, string, string]> = [
   // value, pt (first mention), pt (short), en (first), en (short)
-  [1 / 20, 'uma vez em vinte', 'uma em vinte', 'one time in twenty', 'one in twenty'],
-  [1 / 10, 'uma vez em dez', 'uma em dez', 'one time in ten', 'one in ten'],
-  [1 / 5, 'uma vez em cinco', 'uma em cinco', 'one time in five', 'one in five'],
-  [1 / 4, 'uma vez em quatro', 'uma em quatro', 'one time in four', 'one in four'],
-  [1 / 3, 'uma vez em três', 'uma em três', 'one time in three', 'one in three'],
-  [1 / 2, 'uma vez em duas', 'uma em duas', 'one time in two', 'one in two'],
+  [1 / 20, 'uma vez em vinte', 'uma em vinte', 'once in twenty', 'one in twenty'],
+  [1 / 10, 'uma vez em dez', 'uma em dez', 'once in ten', 'one in ten'],
+  [1 / 8, 'uma vez em oito', 'uma em oito', 'once in eight', 'one in eight'],
+  [1 / 6, 'uma vez em seis', 'uma em seis', 'once in six', 'one in six'],
+  [1 / 5, 'uma vez em cinco', 'uma em cinco', 'once in five', 'one in five'],
+  [1 / 4, 'uma vez em quatro', 'uma em quatro', 'once in four', 'one in four'],
+  [1 / 3, 'uma vez em três', 'uma em três', 'once in three', 'one in three'],
+  [1 / 2, 'uma vez em duas', 'uma em duas', 'about half the time', 'half the time'],
   [2 / 3, 'duas vezes em três', 'duas em três', 'two times in three', 'two in three'],
   [3 / 4, 'três vezes em quatro', 'três em quatro', 'three times in four', 'three in four'],
   [4 / 5, 'quatro vezes em cinco', 'quatro em cinco', 'four times in five', 'four in five'],
@@ -42,6 +44,8 @@ const FRACTIONS: Array<[number, string, string, string, string]> = [
 
 /** A chance as people say it: "uma vez em duas" when it sits near a simple fraction, else "em 61% dos casos". */
 export function chance(p: number, locale: NowcastLocale, short = false): string {
+  if (p >= 0.93) return locale === 'pt' ? 'quase sempre' : 'almost every time';
+  if (p < 0.02) return locale === 'pt' ? 'quase nunca' : 'almost never';
   const hit = FRACTIONS.find(([v]) => Math.abs(p - v) <= Math.max(0.01, v * 0.08));
   if (hit) return locale === 'pt' ? (short ? hit[2] : hit[1]) : (short ? hit[4] : hit[3]);
   const n = Math.round(p * 100);
@@ -96,15 +100,17 @@ export function overviewTitle(rows: readonly SeatChange[], first: Record<string,
 }
 
 /** The overview's standfirst: the seats of the top three, the majority, the odds of first place. */
-export function overviewLede(top: ReadonlyArray<{ party: string; seats: number }>, first: Record<string, number>, majorityReach: number, since: string, locale: NowcastLocale): string {
+export function overviewLede(top: ReadonlyArray<{ party: string; seats: number }>, first: Record<string, number>, majority: { party: string; reach: number }, since: string, locale: NowcastLocale): string {
   const [a, b, c] = top;
   if (!a || !b || !c) return '';
   const seatsLine = locale === 'pt'
     ? `Com base nas sondagens publicadas desde as eleições de ${since}, ${art(a.party)} elegeria cerca de ${a.seats} deputados, ${art(b.party)} ${b.seats} e ${art(c.party)} ${c.seats}.`
     : `On the polls published since the ${since} election, ${partyName(a.party)} would win about ${a.seats} seats, ${partyName(b.party)} ${b.seats} and ${partyName(c.party)} ${c.seats}.`;
-  const majorityLine = majorityReach < 0.05
-    ? (locale === 'pt' ? 'Nenhum partido chega aos 116 da maioria absoluta.' : 'No party reaches the 116 seats of an absolute majority.')
-    : '';
+  const majorityLine = majority.reach < 0.05
+    ? (locale === 'pt' ? 'Nenhum partido alcança os 116 da maioria absoluta.' : 'No party reaches the 116 seats of an absolute majority.')
+    : (locale === 'pt'
+      ? `${Art(majority.party)} alcançaria a maioria absoluta em ${Math.round(majority.reach * 100)}% dos casos.`
+      : `${partyName(majority.party)} would win an absolute majority in ${Math.round(majority.reach * 100)}% of cases.`);
   const ranked = Object.entries(first).filter(([, p]) => p > 0).sort((x, y) => y[1] - x[1]);
   const [one, two] = ranked;
   const oddsLine = !one
@@ -132,14 +138,14 @@ const groupName = (parties: readonly string[], locale: NowcastLocale) => {
 /** Who can govern without Chega: the groups that reach 116 in at least half the scenarios. */
 export function governTitle(majorities: ReadonlyArray<{ parties: readonly string[]; reach: number }>, locale: NowcastLocale): string {
   const reach = majorities.filter(m => m.reach >= 0.5);
-  if (reach.length === 0) return locale === 'pt' ? 'Sem o Chega, nenhuma combinação chega aos 116 deputados' : 'Without Chega, no combination reaches 116 seats';
+  if (reach.length === 0) return locale === 'pt' ? 'Sem o Chega, nenhuma combinação alcança os 116 deputados' : 'Without Chega, no combination reaches 116 seats';
   if (reach.length === 1) {
     return locale === 'pt'
       ? `Sem o Chega, só ${groupName(reach[0].parties, 'pt')} teria maioria`
       : `Without Chega, only ${groupName(reach[0].parties, 'en')} would have a majority`;
   }
-  const names = reach.map(m => groupName(m.parties, locale));
-  return locale === 'pt' ? `Sem o Chega, ${names.join(' ou ')} teriam maioria` : `Without Chega, ${names.join(' or ')} would have a majority`;
+  const plain = reach.map(m => m.parties.map(partyName).join(locale === 'pt' ? ' e ' : ' and '));
+  return locale === 'pt' ? `Sem o Chega, haveria maioria com ${plain.join(' ou com ')}` : `Without Chega, either ${plain.join(' or ')} would have a majority`;
 }
 
 export interface PublishedPoll { name: string; shares: Record<string, number> }
@@ -172,7 +178,7 @@ export function pollsTitle(polls: readonly PublishedPoll[], parties: readonly st
         : `${o.name} puts ${partyName(odd)} ${points(o.gap, 'en')} ahead; ${list(others.map(x => x.name), false)}, ${partyName(main)}`;
     }
   }
-  return locale === 'pt' ? `${howMany} sondagens mais recentes não concordam sobre quem vai à frente` : `${howMany} latest polls disagree on who leads`;
+  return locale === 'pt' ? `${howMany} sondagens mais recentes divergem sobre quem vai à frente` : `${howMany} latest polls disagree on who leads`;
 }
 
 /** The trend page's h1: who fell and who rose clearly since the last election (two points or more). */
@@ -221,7 +227,7 @@ export function firstTitle(first: Record<string, number>, locale: NowcastLocale)
   if (!one) return locale === 'pt' ? 'Quem elege mais deputados' : 'Who wins the most seats';
   const pct = (p: number) => (p > 0.99 ? (locale === 'pt' ? 'mais de 99%' : 'over 99%') : `${Math.round(p * 100)}%`);
   if (!two || one[1] > 0.99) {
-    return locale === 'pt' ? `${Art(one[0])} tem ${pct(one[1])} de hipóteses de eleger mais deputados` : `${partyName(one[0])} has ${one[1] > 0.99 ? 'a more than 99%' : `a ${pct(one[1])}`} chance of winning the most seats`;
+    return locale === 'pt' ? `${Art(one[0])} tem ${pct(one[1])} de hipóteses de eleger mais deputados` : (one[1] > 0.99 ? `${partyName(one[0])} is more than 99% likely to win the most seats` : `${partyName(one[0])} has a ${pct(one[1])} chance of winning the most seats`);
   }
   return locale === 'pt'
     ? `${Art(one[0])} tem ${pct(one[1])} de hipóteses de eleger mais deputados; ${art(two[0])}, ${pct(two[1])}`
@@ -242,14 +248,16 @@ export function majoritiesTitle(majorities: ReadonlyArray<{ parties: readonly st
       ? `${cap(name(sure[0]))} chegam quase sempre à maioria; nem ${never.map(name).join(' nem ')} lá chegam`
       : `${cap(name(sure[0]))} almost always reach a majority; neither ${never.map(name).join(' nor ')} does`;
   }
-  return locale === 'pt' ? 'Quem chega aos 116 deputados' : 'Who reaches 116 seats';
+  return locale === 'pt' ? 'Quem alcança os 116 deputados' : 'Who reaches 116 seats';
 }
 
 /** The emigration block: how often the choice between the two recent patterns changes the winner. */
 export function emigrationTitle(share: number, years: readonly string[], locale: NowcastLocale): string {
   if (!Number.isFinite(share) || years.length < 2) return locale === 'pt' ? 'Os 4 deputados da emigração' : 'The 4 emigration seats';
   const [a, b] = years;
+  const pt = `muda o vencedor ${chance(share, 'pt')}`.replace('muda o vencedor quase nunca', 'quase nunca muda o vencedor').replace('muda o vencedor quase sempre', 'quase sempre muda o vencedor');
+  const en = `changes the winner ${chance(share, 'en')}`.replace('changes the winner almost never', 'almost never changes the winner').replace('changes the winner almost every time', 'almost always changes the winner');
   return locale === 'pt'
-    ? `Repartir os 4 deputados da emigração como em ${a} ou em ${b} muda o vencedor ${share < 0.01 ? 'quase nunca' : chance(share, 'pt')}`
-    : `Sharing out the 4 emigration seats as in ${a} or as in ${b} changes the winner ${share < 0.01 ? 'almost never' : chance(share, 'en')}`;
+    ? `Repartir os 4 deputados da emigração como em ${a} ou em ${b} ${pt}`
+    : `Sharing out the 4 emigration seats as in ${a} or as in ${b} ${en}`;
 }

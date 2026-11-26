@@ -20,11 +20,14 @@ describe('nowcast headings', () => {
   });
 
   it('writes the standfirst with chances people say', () => {
-    expect(overviewLede(rows, { PS: 0.526, CH: 0.347, AD: 0.104 }, 0, 'maio de 2025', 'pt')).toBe(
-      'Com base nas sondagens publicadas desde as eleições de maio de 2025, o PS elegeria cerca de 75 deputados, o Chega 71 e a AD 63. Nenhum partido chega aos 116 da maioria absoluta. O PS ficaria à frente uma vez em duas; o Chega, uma em três.',
+    expect(overviewLede(rows, { PS: 0.526, CH: 0.347, AD: 0.104 }, { party: 'PS', reach: 0 }, 'maio de 2025', 'pt')).toBe(
+      'Com base nas sondagens publicadas desde as eleições de maio de 2025, o PS elegeria cerca de 75 deputados, o Chega 71 e a AD 63. Nenhum partido alcança os 116 da maioria absoluta. O PS ficaria à frente uma vez em duas; o Chega, uma em três.',
     );
     expect(chance(0.61, 'pt')).toBe('em 61% dos casos');
     expect(chance(0.0545, 'pt')).toBe('uma vez em vinte');
+    expect(chance(0.12, 'pt')).toBe('uma vez em oito');
+    expect(chance(0.95, 'pt')).toBe('quase sempre');
+    expect(chance(0.526, 'en')).toBe('about half the time');
     expect(aboutPoints(9.5, 'pt')).toBe('quase 10 pontos');
     expect(aboutPoints(9.2, 'pt')).toBe('mais de 9 pontos');
   });
@@ -32,10 +35,10 @@ describe('nowcast headings', () => {
   it('names who can govern without Chega, with fallbacks', () => {
     const m = (reach: number[]) => [['AD', 'IL'], ['PS', 'L', 'CDU', 'BE', 'PAN'], ['PS', 'AD']].map((parties, i) => ({ parties, reach: reach[i] }));
     expect(governTitle(m([0, 0, 0.99]), 'pt')).toBe('Sem o Chega, só um acordo entre PS e AD teria maioria');
-    expect(governTitle(m([0, 0, 0.3]), 'pt')).toBe('Sem o Chega, nenhuma combinação chega aos 116 deputados');
-    expect(governTitle(m([0.6, 0, 0.99]), 'pt')).toBe('Sem o Chega, AD e IL ou um acordo entre PS e AD teriam maioria');
+    expect(governTitle(m([0, 0, 0.3]), 'pt')).toBe('Sem o Chega, nenhuma combinação alcança os 116 deputados');
+    expect(governTitle(m([0.6, 0, 0.99]), 'pt')).toBe('Sem o Chega, haveria maioria com AD e IL ou com PS e AD');
     expect(majoritiesTitle(m([0, 0, 0.99]), 'pt')).toBe('PS e AD juntos chegam quase sempre à maioria; nem AD e IL nem a esquerda lá chegam');
-    expect(majoritiesTitle(m([0.4, 0, 0.99]), 'pt')).toBe('Quem chega aos 116 deputados');
+    expect(majoritiesTitle(m([0.4, 0, 0.99]), 'pt')).toBe('Quem alcança os 116 deputados');
   });
 
   it('reads the latest polls as published', () => {
@@ -46,7 +49,7 @@ describe('nowcast headings', () => {
     ];
     expect(pollsTitle(polls, ['PS', 'CH', 'AD'], 'pt')).toBe('A CESOP–Católica põe a AD um ponto à frente; a Pitagórica e a Intercampus, o PS');
     expect(pollsTitle(polls.map(p => ({ ...p, shares: { PS: 0.3, CH: 0.2 } })), ['PS', 'CH'], 'pt')).toBe('As três sondagens mais recentes põem o PS à frente');
-    expect(pollsTitle([polls[0], polls[1], { name: 'ICS/ISCTE', shares: { CH: 0.3, PS: 0.2 } }], ['PS', 'CH', 'AD'], 'pt')).toBe('As três sondagens mais recentes não concordam sobre quem vai à frente');
+    expect(pollsTitle([polls[0], polls[1], { name: 'ICS/ISCTE', shares: { CH: 0.3, PS: 0.2 } }], ['PS', 'CH', 'AD'], 'pt')).toBe('As três sondagens mais recentes divergem sobre quem vai à frente');
   });
 
   it('writes the trend, pollster, seats and emigration headings', () => {
@@ -56,6 +59,7 @@ describe('nowcast headings', () => {
     expect(gapTitle([{ name: 'Intercampus', polls: 3, gap: { AD: -3.4 }, above: { AD: 0 } }], 'pt')).toBe('Nenhuma empresa se afasta muito da estimativa');
     expect(firstTitle({ PS: 0.526, CH: 0.347, AD: 0.104 }, 'pt')).toBe('O PS tem 53% de hipóteses de eleger mais deputados; o Chega, 35%');
     expect(emigrationTitle(0.0545, ['2024', '2025'], 'pt')).toBe('Repartir os 4 deputados da emigração como em 2024 ou em 2025 muda o vencedor uma vez em vinte');
+    expect(emigrationTitle(0.004, ['2024', '2025'], 'pt')).toBe('Repartir os 4 deputados da emigração como em 2024 ou em 2025 quase nunca muda o vencedor');
   });
 });
 

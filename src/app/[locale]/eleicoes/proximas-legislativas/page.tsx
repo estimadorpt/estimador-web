@@ -87,7 +87,13 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
   const pollParties = file.parties;
   const pollHeading = pollsTitle(latest.map(p => ({ name: pollsterDisplayName(p.pollster), shares: p.shares })), pollParties, loc);
   const dayMonth = (iso: string) => shortDate(iso).replace(/\s\d{4}$/, '');
-  const fieldwork = (start: string | null, end: string) => (start && start !== end ? `${dayMonth(start)} ${pt ? 'a' : 'to'} ${dayMonth(end)}` : dayMonth(end));
+  // "13 a 19 nov." in one month, "26 out. a 23 nov." across two ("13–19 Nov", "26 Oct–23 Nov").
+  const fieldwork = (start: string | null, end: string) => {
+    if (!start || start === end) return dayMonth(end);
+    const sameMonth = start.slice(0, 7) === end.slice(0, 7);
+    const from = sameMonth ? String(Number(start.slice(8, 10))) : dayMonth(start);
+    return pt ? `${from} a ${dayMonth(end)}` : `${from}–${dayMonth(end)}`;
+  };
   const pct = (v: number) => `${formatElectionNumber(v * 100, locale, Math.abs(v * 100 - Math.round(v * 100)) < 1e-6 ? 0 : 1)}%`;
 
   // Who can govern without Chega, and the sums with it (folded: a coalition with Chega is not on the table).
