@@ -781,6 +781,17 @@ test pins a value.
 - **Sondagens**: the trend since 2025 with every poll as a dot, how each pollster compares with the estimate, every poll.
 - **Deputados**: first place, majorities, two-thirds (and Chega's blocking third), the sums with Chega folded, the emigration
   patterns, the small parties against proportionality.
+- **El País-style charts** (owner's pick, 26 Nov 2026, after Kiko Llaneras's election thread):
+  - **`SeatBars`** (`src/components/nowcast/SeatBars.tsx`, top of Resumo): one column per party, the party's colour up to
+    the low end of the 90% range, the same colour pale up to the high end, an ink line at the central figure, a black square
+    at 2025, the figure on top and the range and change under the name. It is the one place the margin is drawn in the
+    party's pale colour instead of the yellow band (yellow blocks that size drowned the parties); the seat table is its twin,
+    folded.
+  - **Poll line ends** print the page's own vote shares (`PollingChart` `endValues`), so the chart and the figures agree.
+  - **`LeadHistogram`** (Deputados): every simulation by the leader's lead over the runner-up in votes, coloured by who
+    wins most seats, with the shares in a legend above. It needs each seat draw's national vote shares, which the export
+    writes as `vote` on every row of the build-only seat file (estimador-elections `attach_vote_shares`); without them the
+    page falls back to the plain odds. `leadHistogram` and `leadTitle` (how many points of lead settle first place).
 - **Círculos**: the existing `DistrictSummary` until the export carries district seat draws (planned: the contested seat in
   each district, as in the owner's mock of 26 Nov 2026).
 - The homepage's elections channel shows the same estimated seats (`home.nowcastFinding`).

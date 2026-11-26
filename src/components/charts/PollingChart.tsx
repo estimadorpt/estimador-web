@@ -42,6 +42,12 @@ interface PollingChartProps {
    * average's last value (the nowcast's include the shared polling error).
    */
   endLabels?: "value" | "party";
+  /**
+   * With endLabels "party": a figure to print after each party's name, in
+   * percentage points (the nowcast passes its own vote shares, so the chart
+   * and the page's figures agree to the decimal).
+   */
+  endValues?: Record<string, number>;
 }
 
 /** One party's value on one date, as Plot reads it. */
@@ -67,7 +73,7 @@ const day = (iso: string) => new Date(`${iso}T12:00:00Z`);
  * each other near the floor, so their lines go without, and the table holds
  * every party with its band.
  */
-export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true }, showNote = true, polls, endLabels = "value" }: PollingChartProps) {
+export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp, band = { percent: 94, hdi: true }, showNote = true, polls, endLabels = "value", endValues }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("forecast");
   const voteShareLabel = voteShareLabelProp ?? t("voteShareLabel");
@@ -187,7 +193,9 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         Plot.text(labels, {
           x: "date",
           y: "ly",
-          text: (d: Point) => (endLabels === "party" ? partyName(d.party) : `${d.party} ${fmtPct(d.mean)}`),
+          text: (d: Point) => (endLabels === "party"
+            ? (endValues?.[d.party] != null ? `${partyName(d.party)} ${fmtPct(endValues[d.party] / 100)}` : partyName(d.party))
+            : `${d.party} ${fmtPct(d.mean)}`),
           fill: FURNITURE.text,
           dx: mobile ? 6 : 8,
           fontSize: mobile ? 11 : 12,
@@ -200,7 +208,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         width: containerWidth,
         height: containerHeight,
         marginLeft: mobile ? 45 : 60,
-        marginRight: mobile ? 72 : 120,
+        marginRight: endValues ? (mobile ? 96 : 130) : mobile ? 72 : 120,
         marginTop,
         marginBottom,
         style: { backgroundColor: "transparent", color: FURNITURE.textMuted, fontSize: mobile ? "11px" : "12px", fontFamily: FURNITURE.font },
@@ -234,7 +242,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     const resizeObserver = new ResizeObserver(() => setTimeout(render, 100));
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [points, series, lastIndex, voteShareLabel, locale, banded, polls, endLabels]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [points, series, lastIndex, voteShareLabel, locale, banded, polls, endLabels, endValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full">

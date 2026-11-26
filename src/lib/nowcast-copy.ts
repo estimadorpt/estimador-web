@@ -261,3 +261,15 @@ export function emigrationTitle(share: number, years: readonly string[], locale:
     ? `Repartir os 4 deputados da emigração como em ${a} ou em ${b} ${pt}`
     : `Sharing out the 4 emigration seats as in ${a} or as in ${b} ${en}`;
 }
+
+/** The lead histogram's heading: how far ahead in votes a party must be to come first, read from the simulations. */
+export function leadTitle(h: { a: string; b: string; settled: number | null }, locale: NowcastLocale): string {
+  if (h.settled != null && h.settled <= 3) {
+    return locale === 'pt'
+      ? `Entre ${partyName(h.a)} e ${partyName(h.b)}, quem tiver mais votos fica em primeiro; com menos de ${points(h.settled, 'pt')} de diferença, tudo fica em aberto`
+      : `Between ${partyName(h.a)} and ${partyName(h.b)}, whoever wins more votes comes first; with less than ${points(h.settled, 'en')} between them, it is open`;
+  }
+  return locale === 'pt'
+    ? `Quem fica em primeiro, conforme a vantagem ${deArt(h.a)} sobre ${art(h.b)}`
+    : `Who comes first, by ${partyName(h.a)}'s lead over ${partyName(h.b)}`;
+}

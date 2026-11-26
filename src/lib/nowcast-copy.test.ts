@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { aboutPoints, chance, emigrationTitle, firstTitle, gapTitle, governTitle, majoritiesTitle, overviewLede, overviewTitle, pollsTitle, trendTitle } from './nowcast-copy';
-import { leaderChangeShare, pollsterGaps, roundToTotal, voteShares } from './nowcast-summary';
+import { aboutPoints, chance, emigrationTitle, firstTitle, gapTitle, governTitle, leadTitle, majoritiesTitle, overviewLede, overviewTitle, pollsTitle, trendTitle } from './nowcast-copy';
+import { leadHistogram, leaderChangeShare, pollsterGaps, roundToTotal, voteShares } from './nowcast-summary';
 import { pollOutlet } from './nowcast-polls';
+import type { SeatDraw } from './election-aggregates';
 
 const rows = [
   { party: 'PS', seats: 75, before: 58, lo: 59, hi: 92 },
@@ -99,5 +100,27 @@ describe('nowcast figures', () => {
     expect(pollOutlet('https://www.rtp.pt/noticias/x')).toEqual({ pt: 'a RTP', en: 'RTP' });
     expect(pollOutlet('https://executivedigest.sapo.pt/x')).toBeNull();
     expect(pollOutlet(null)).toBeNull();
+  });
+});
+
+describe('the lead histogram', () => {
+  // PS ahead by x points wins when x > 0, except within half a point either way, where Chega does.
+  const draws = Array.from({ length: 400 }, (_, i) => {
+    const lead = (i % 40) / 2 - 10; // -10 .. +9.5 points
+    const psWins = lead >= 0.5 || (lead > -0.5 && lead < 0 ? false : lead >= 0.5);
+    return { PS: psWins ? 80 : 70, CH: psWins ? 70 : 80, AD: 70, vote: { PS: 0.3 + lead / 200, CH: 0.3 - lead / 200, AD: 0.2 } };
+  }) as unknown as SeatDraw[];
+
+  it('bins the simulations by lead and finds where the result settles', () => {
+    const h = leadHistogram(draws, 'PS', 'CH', ['PS', 'CH', 'AD'])!;
+    expect(h.draws).toBe(400);
+    expect(h.bins.reduce((n, b) => n + Object.values(b.counts).reduce((x, y) => x + y, 0), 0)).toBe(400);
+    expect(h.settled).toBe(1);
+    expect(leadTitle(h, 'pt')).toBe('Entre PS e Chega, quem tiver mais votos fica em primeiro; com menos de um ponto de diferença, tudo fica em aberto');
+  });
+
+  it('falls back when the seats do not follow the votes, and needs the votes', () => {
+    expect(leadTitle({ a: 'PS', b: 'CH', settled: null }, 'pt')).toBe('Quem fica em primeiro, conforme a vantagem do PS sobre o Chega');
+    expect(leadHistogram(draws.map(d => ({ ...d, vote: undefined })), 'PS', 'CH', ['PS', 'CH', 'AD'])).toBeNull();
   });
 });
