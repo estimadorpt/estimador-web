@@ -168,10 +168,11 @@ export interface LeadHistogram {
   /** One bar per whole point of lead (a − b, in points), from the lowest to the highest. */
   bins: Array<{ x: number; counts: Record<string, number> }>;
   /**
-   * The smallest whole lead from which the party ahead in votes is first in at least 80% of
-   * the simulations at every lead beyond it, on both sides; null when there is none up to 5.
+   * The lead in votes from which `a` wins more seats than `b` in at least half the simulations
+   * (the lowest edge of the first such bar, in whole points; negative when `a` needs fewer votes);
+   * null when no bar with 20 simulations or more crosses.
    */
-  settled: number | null;
+  crossover: number | null;
   draws: number;
 }
 
@@ -190,24 +191,19 @@ export function leadHistogram(draws: readonly SeatDraw[], a: string, b: string, 
   const lo = Math.floor(quantileSorted(sorted, 0.005));
   const hi = Math.floor(quantileSorted(sorted, 0.995));
   const bins = new Map<number, Record<string, number>>();
-  for (let x = lo; x <= hi; x++) bins.set(x, {});
+  const beats = new Map<number, { yes: number; n: number }>();
+  for (let x = lo; x <= hi; x++) { bins.set(x, {}); beats.set(x, { yes: 0, n: 0 }); }
   rows.forEach((r, i) => {
     const x = Math.min(hi, Math.max(lo, Math.floor(leads[i])));
     const who = leaderOf(r.d, parties);
     const c = bins.get(x)!;
     c[who] = (c[who] ?? 0) + 1;
+    const bt = beats.get(x)!;
+    bt.n++;
+    if (seatsOf(r.d, a) > seatsOf(r.d, b)) bt.yes++;
   });
   const list = [...bins.entries()].map(([x, counts]) => ({ x, counts }));
-  const firstShare = (bin: { x: number; counts: Record<string, number> }) => {
-    const n = Object.values(bin.counts).reduce((s, v) => s + v, 0);
-    const ahead = bin.x >= 0 ? a : b;
-    return n < 20 ? null : (bin.counts[ahead] ?? 0) / n;
-  };
-  let settled: number | null = null;
-  for (let k = 1; k <= 5; k++) {
-    // Bars entirely beyond k points either way: [k, k+1) and up, and up to [-k-1, -k).
-    const beyond = list.filter(bin => bin.x >= k || bin.x + 1 <= -k);
-    if (beyond.every(bin => { const s = firstShare(bin); return s == null || s >= 0.8; })) { settled = k; break; }
-  }
-  return { a, b, bins: list, settled, draws: rows.length };
+  const crossing = [...beats.entries()].sort((p, q) => p[0] - q[0]).find(([, v]) => v.n >= 20 && v.yes / v.n >= 0.5);
+  const crossover = crossing ? crossing[0] : null;
+  return { a, b, bins: list, crossover, draws: rows.length };
 }

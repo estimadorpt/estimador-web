@@ -115,12 +115,14 @@ describe('the lead histogram', () => {
     const h = leadHistogram(draws, 'PS', 'CH', ['PS', 'CH', 'AD'])!;
     expect(h.draws).toBe(400);
     expect(h.bins.reduce((n, b) => n + Object.values(b.counts).reduce((x, y) => x + y, 0), 0)).toBe(400);
-    expect(h.settled).toBe(1);
-    expect(leadTitle(h, 'pt')).toBe('Entre PS e Chega, quem tiver mais votos fica em primeiro; com menos de um ponto de diferença, tudo fica em aberto');
+    expect(h.crossover).toBe(0);
+    expect(leadTitle(h, 'pt')).toBe('Basta ao PS ter mais votos do que o Chega para eleger mais deputados');
+    expect(leadTitle({ ...h, crossover: 1 }, 'pt')).toBe('Para eleger mais deputados do que o Chega, o PS precisa de cerca de um ponto de vantagem nos votos');
+    expect(leadTitle({ ...h, crossover: -2 }, 'pt')).toBe('O PS elege mais deputados do que o Chega mesmo com até 2 pontos a menos nos votos');
   });
 
   it('falls back when the seats do not follow the votes, and needs the votes', () => {
-    expect(leadTitle({ a: 'PS', b: 'CH', settled: null }, 'pt')).toBe('Quem fica em primeiro, conforme a vantagem do PS sobre o Chega');
+    expect(leadTitle({ a: 'PS', b: 'CH', crossover: null }, 'pt')).toBe('Quem fica em primeiro, conforme a vantagem do PS sobre o Chega');
     expect(leadHistogram(draws.map(d => ({ ...d, vote: undefined })), 'PS', 'CH', ['PS', 'CH', 'AD'])).toBeNull();
   });
 });

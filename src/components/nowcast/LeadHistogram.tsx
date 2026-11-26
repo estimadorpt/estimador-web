@@ -13,7 +13,7 @@ export function LeadHistogram({ h, first, tie, locale }: { h: LeadHistogramData;
   const outcomes = [...Object.entries(first).filter(([, p]) => p > 0).sort((x, y) => y[1] - x[1]).map(([p]) => p), ...(tie > 0 ? ['tie'] : [])];
   const share = (o: string) => (o === 'tie' ? tie : first[o] ?? 0);
   const pct = (p: number) => (p < 0.01 ? (pt ? 'menos de 1%' : 'under 1%') : `${Math.round(p * 100)}%`);
-  const name = (o: string) => (o === 'tie' ? (pt ? 'empate' : 'tie') : pt ? `${partyName(o)} primeiro` : `${partyName(o)} first`);
+  const name = (o: string) => (o === 'tie' ? (pt ? 'empate' : 'tie') : pt ? `${partyName(o)} em 1.º` : `${partyName(o)} first`);
   const max = Math.max(...h.bins.map(b => Object.values(b.counts).reduce((s, v) => s + v, 0)));
   const lo = h.bins[0]?.x ?? 0;
   const hi = (h.bins.at(-1)?.x ?? 0) + 1;
@@ -56,8 +56,8 @@ export function LeadHistogram({ h, first, tie, locale }: { h: LeadHistogramData;
       </div>
       <figcaption className="mt-1 text-[12.5px] text-graphite">
         {pt
-          ? `Vantagem ${h.a === 'AD' ? 'da' : 'do'} ${partyName(h.a)} sobre ${h.b === 'AD' ? 'a' : 'o'} ${partyName(h.b)} nos votos, em pontos. Cada barra junta os cenários com essa vantagem; a cor diz quem elege mais deputados.`
-          : `${partyName(h.a)}'s lead over ${partyName(h.b)} in votes, in points. Each bar gathers the scenarios with that lead; the colour shows who wins most seats.`}
+          ? `Vantagem ${h.a === 'AD' ? 'da' : 'do'} ${partyName(h.a)} sobre ${h.b === 'AD' ? 'a' : 'o'} ${partyName(h.b)} nos votos, em pontos. A cor mostra quem elege mais deputados.`
+          : `${partyName(h.a)}'s lead over ${partyName(h.b)} in votes, in points. The colour shows who wins most seats.`}
       </figcaption>
     </figure>
   );

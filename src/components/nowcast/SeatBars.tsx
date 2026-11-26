@@ -40,7 +40,7 @@ export function SeatBars({ rows, locale, label }: { rows: readonly SeatRowData[]
               <span className="absolute -inset-x-[3px] h-[2.5px] bg-ink" style={{ bottom: `calc(${y(r.seats)} - 1px)` }} />
               {/* 2025. */}
               {r.before != null && <span className="absolute left-1/2 h-[7px] w-[7px] -translate-x-1/2 translate-y-1/2 bg-ink ring-1 ring-paper" style={{ bottom: y(r.before) }} />}
-              <span className="absolute inset-x-[-8px] text-center font-display text-[17px] font-extrabold leading-none tabular-nums text-ink sm:text-[20px]" style={{ bottom: `calc(${y(r.hi)} + 5px)` }}>{r.seats}</span>
+              <span className="absolute inset-x-[-8px] text-center font-display text-[17px] font-extrabold leading-none tabular-nums text-ink sm:text-[20px]" style={{ bottom: `calc(${y(Math.max(r.hi, r.before ?? 0))} + 7px)` }}>{r.seats}</span>
             </div>
           ))}
         </div>

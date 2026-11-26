@@ -791,7 +791,7 @@ test pins a value.
   - **`LeadHistogram`** (Deputados): every simulation by the leader's lead over the runner-up in votes, coloured by who
     wins most seats, with the shares in a legend above. It needs each seat draw's national vote shares, which the export
     writes as `vote` on every row of the build-only seat file (estimador-elections `attach_vote_shares`); without them the
-    page falls back to the plain odds. `leadHistogram` and `leadTitle` (how many points of lead settle first place).
+    page falls back to the plain odds. `leadHistogram` and `leadTitle` (the lead in votes from which the leader wins more seats than the runner-up).
 - **Círculos**: the existing `DistrictSummary` until the export carries district seat draws (planned: the contested seat in
   each district, as in the owner's mock of 26 Nov 2026).
 - The homepage's elections channel shows the same estimated seats (`home.nowcastFinding`).
