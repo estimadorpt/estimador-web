@@ -5,10 +5,10 @@ import { setRequestLocale } from '@/i18n/request-locale';
 import { majorityThreshold } from '@/lib/config/blocs';
 import { PARLIAMENTARY_2025_SEATS } from '@/lib/config/elections';
 import { loadLegislativeNowcast, NOWCAST_HOUSE_ORDER } from '@/lib/utils/data-loader';
-import { formatElectionLongDate, formatElectionShortDate, formatElectionNumber, pollsterDisplayName } from '@/lib/election-display';
-import { governTitle, overviewLede, overviewTitle, partyName, pollsTitle } from '@/lib/nowcast-copy';
+import { formatElectionLongDate, formatElectionShortDate, formatElectionNumber } from '@/lib/election-display';
+import { governTitle, overviewLede, overviewTitle, partyName, trendTitle } from '@/lib/nowcast-copy';
+import { onModelBase } from '@/lib/legislative-nowcast';
 import { seatTotal } from '@/lib/nowcast-summary';
-import { pollOutlet } from '@/lib/nowcast-polls';
 import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -16,6 +16,7 @@ import { Disclosure } from '@/components/viz/Disclosure';
 import { TextLink } from '@/components/brand/TextLink';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { ParliamentBar } from '@/components/charts/ParliamentBar';
+import { PollingChart } from '@/components/charts/PollingChart';
 import { NowcastNav } from '@/components/nowcast/NowcastNav';
 import { NowcastSource, SeatKey, SeatTable, SumRow } from '@/components/nowcast/parts';
 
@@ -82,19 +83,11 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
   const title = overviewTitle(rows.filter(r => r.before != null).map(r => ({ ...r, before: r.before! })), seats.first, loc);
   const lede = overviewLede(rows.slice(0, 3), seats.first, singleMajority, prevMonth, loc);
 
-  // The latest polls, as published.
-  const latest = [...file.polls].sort((a, b) => b.fieldwork_end.localeCompare(a.fieldwork_end)).slice(0, 3);
-  const pollParties = file.parties;
-  const pollHeading = pollsTitle(latest.map(p => ({ name: pollsterDisplayName(p.pollster), shares: p.shares })), pollParties, loc);
-  const dayMonth = (iso: string) => shortDate(iso).replace(/\s\d{4}$/, '');
-  // "13 a 19 nov." in one month, "26 out. a 23 nov." across two ("13–19 Nov", "26 Oct–23 Nov").
-  const fieldwork = (start: string | null, end: string) => {
-    if (!start || start === end) return dayMonth(end);
-    const sameMonth = start.slice(0, 7) === end.slice(0, 7);
-    const from = sameMonth ? String(Number(start.slice(8, 10))) : dayMonth(start);
-    return pt ? `${from} a ${dayMonth(end)}` : `${from}–${dayMonth(end)}`;
-  };
-  const pct = (v: number) => `${formatElectionNumber(v * 100, locale, Math.abs(v * 100 - Math.round(v * 100)) < 1e-6 ? 0 : 1)}%`;
+  // The polls since the last election: the trend with every poll as a dot, on the estimate's base.
+  const changes = file.national.map(r => ({ party: r.party, change: (votes[r.party] ?? 0) - 100 * (previous.shares[r.party] ?? 0) }));
+  const dots = file.polls.flatMap(poll =>
+    Object.entries(onModelBase(poll.shares, file.parties)).filter(([, share]) => share > 0).map(([party, share]) => ({ date: poll.fieldwork_end, party, share })),
+  );
 
   // Who can govern without Chega, and the sums with it (folded: a coalition with Chega is not on the table).
   const house = NOWCAST_HOUSE_ORDER.map(p => seats.seats.find(s => s.party === p)).filter((s): s is { party: string; seats: number } => s != null);
@@ -126,25 +119,13 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
             <NowcastSource {...source} note={emigrationNote} />
           </section>
 
-          <section aria-labelledby="sondagens-titulo" className="max-w-2xl border-t border-ink pt-3">
-            <h2 id="sondagens-titulo" className="text-[21px] leading-[27px] text-ink">{pollHeading}</h2>
-            <p className="mt-1 text-[13.5px] text-graphite">{pt ? 'Como publicadas, com outros partidos e indecisos' : 'As published, with other parties and undecided voters'}</p>
-            <ul className="mt-2 border-t border-ink">
-              {latest.map(poll => {
-                const outlet = pollOutlet(poll.source_url);
-                const top = pollParties.filter(p => poll.shares[p] != null).sort((a, b) => (poll.shares[b] ?? 0) - (poll.shares[a] ?? 0)).slice(0, 3);
-                return (
-                  <li key={`${poll.pollster}-${poll.fieldwork_end}`} className="border-b border-grid py-2.5">
-                    <p className="text-[14.5px] text-ink">
-                      <span className="font-semibold">{pollsterDisplayName(poll.pollster)}{outlet ? (pt ? ` para ${outlet.pt}` : ` for ${outlet.en}`) : ''}</span>
-                      <span className="text-graphite">, {fieldwork(poll.fieldwork_start, poll.fieldwork_end)}{poll.sample_size ? (pt ? `, ${count(poll.sample_size)} entrevistas` : `, ${count(poll.sample_size)} interviews`) : ''}</span>
-                    </p>
-                    <p className="mt-0.5 text-[14.5px] tabular-nums text-ink">{top.map(p => `${partyName(p)} ${pct(poll.shares[p])}`).join(', ')}</p>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-3"><TextLink href={`${PATH}/sondagens`} locale={locale}>{pt ? `As ${count(file.polls.length)} sondagens e a evolução desde ${prevYear}` : `All ${count(file.polls.length)} polls and the trend since ${prevYear}`}</TextLink></p>
+          <section aria-labelledby="sondagens-titulo" className="max-w-3xl border-t border-ink pt-3">
+            <h2 id="sondagens-titulo" className="text-[21px] leading-[27px] text-ink">{trendTitle(changes, prevYear, loc)}</h2>
+            <p className="mt-1 text-[13.5px] text-graphite">{pt ? 'Cada ponto é uma sondagem; a linha é a estimativa, semana a semana.' : 'Each dot is a poll; the line is the estimate, week by week.'}</p>
+            <div className="mt-3">
+              <PollingChart series={{ dates: file.trend.dates, parties: file.trend.parties }} voteShareLabel={pt ? '% dos votos' : '% of the vote'} band={{ percent: Math.round(file.trend.interval * 100), hdi: false }} showNote={false} polls={dots} endLabels="party" />
+            </div>
+            <p className="mt-3"><TextLink href={`${PATH}/sondagens`} locale={locale}>{pt ? `As ${count(file.polls.length)} sondagens e como cada empresa se compara` : `All ${count(file.polls.length)} polls and how each pollster compares`}</TextLink></p>
           </section>
 
           <section aria-labelledby="governar-titulo" className="max-w-2xl border-t border-ink pt-3">
