@@ -89,9 +89,10 @@ export function overviewTitle(rows: readonly SeatChange[], first: Record<string,
   if (!clear || Math.abs(clear.seats - clear.before) < 5) return lead;
   const n = Math.abs(clear.seats - clear.before);
   const lose = clear.seats < clear.before;
+  const same = clear.party === a.party;
   return locale === 'pt'
-    ? `${lead}; ${art(clear.party)} ${lose ? 'perderia' : 'ganharia'} ${n} deputados`
-    : `${lead}; ${partyName(clear.party)} would ${lose ? 'lose' : 'gain'} ${n} seats`;
+    ? `${lead}; ${same ? '' : `${art(clear.party)} `}${lose ? 'perderia' : 'ganharia'} ${n} deputados`
+    : `${lead}; ${same ? 'it' : partyName(clear.party)} would ${lose ? 'lose' : 'gain'} ${n} seats`;
 }
 
 /** The overview's standfirst: the seats of the top three, the majority, the odds of first place. */
@@ -220,7 +221,7 @@ export function firstTitle(first: Record<string, number>, locale: NowcastLocale)
   if (!one) return locale === 'pt' ? 'Quem elege mais deputados' : 'Who wins the most seats';
   const pct = (p: number) => (p > 0.99 ? (locale === 'pt' ? 'mais de 99%' : 'over 99%') : `${Math.round(p * 100)}%`);
   if (!two || one[1] > 0.99) {
-    return locale === 'pt' ? `${Art(one[0])} tem ${pct(one[1])} de hipóteses de eleger mais deputados` : `${partyName(one[0])} has a ${pct(one[1])} chance of winning the most seats`;
+    return locale === 'pt' ? `${Art(one[0])} tem ${pct(one[1])} de hipóteses de eleger mais deputados` : `${partyName(one[0])} has ${one[1] > 0.99 ? 'a more than 99%' : `a ${pct(one[1])}`} chance of winning the most seats`;
   }
   return locale === 'pt'
     ? `${Art(one[0])} tem ${pct(one[1])} de hipóteses de eleger mais deputados; ${art(two[0])}, ${pct(two[1])}`
