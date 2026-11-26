@@ -372,7 +372,10 @@ the system changes.
   `meta.defaultDescription`, the footer blurb, the feed description, the OG brand card, the social
   kit and the README; `descriptor.test.ts` fails on a retyped copy. `npm run brand` regenerates
   every logo, icon and social asset. Voice: sentence case, findings as headlines, uncertainty
-  drawn and dated with its source, one action per piece, no emoji or exclamation marks.
+  drawn and dated with its source, one action per piece, no emoji or exclamation marks. **No middle dots
+  (·) between words, phrases or figures** (owner, 26 November 2026: "I don't want dots in between words"): write a
+  sentence, use a comma, or put the parts on separate lines. New copy never adds one; older pages still carry
+  some (kickers such as "Arquivo · 2025", date lines) and lose them as they are touched.
   Portuguese copy addresses the reader as **tu**, never você; English is en-GB. Portuguese keeps
   the English tech terms PT-PT readers say ("download", "link", "checksums", "online", "email",
   "feed", "app") and never shows production jargon ("empacotamento", "bundle", "contrato",

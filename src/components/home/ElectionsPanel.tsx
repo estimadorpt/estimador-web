@@ -125,7 +125,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
       {nowcast.available && nowcastLeader && (
         <div className="min-w-0 border-b border-rule py-3">
           <p className="text-[13px] text-graphite">
-            <span className="font-semibold text-ink">{t('nowcastTitle')}</span>{' · '}{t('nowcastDate', { date: longDate(nowcast.file.run.as_of), poll: longDate(nowcast.file.run.last_poll) })}
+            <span className="font-semibold text-ink">{t('nowcastTitle')}</span>{', '}{t('nowcastDate', { date: longDate(nowcast.file.run.as_of), poll: longDate(nowcast.file.run.last_poll) })}
           </p>
           <p className="disp mt-1 text-[22px] leading-[1.08] md:text-[24px]">{t('nowcastFinding', { seats: [...nowcast.parliament].sort((a, b) => b.seats - a.seats).slice(0, 3).map(r => `${partyName(r.party)} ${r.seats}`).join(', ') })}</p>
           <p className="mt-1 max-w-[70ch] text-[13px] text-graphite">{t('nowcastNote')}</p>

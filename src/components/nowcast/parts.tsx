@@ -116,10 +116,11 @@ export function NowcastSource({ polls, from, to, note, locale }: { polls: number
       {pt
         ? `Fonte: modelo estimador.pt, com as ${polls} sondagens publicadas entre ${from} e ${to}.`
         : `Source: estimador.pt model, with the ${polls} polls published from ${from} to ${to}.`}
-      {note ? ` ${note}` : ''}{' '}
-      <a href={`${base}/eleicoes/proximas-legislativas/#metodo`} className="text-ink underline underline-offset-2">{pt ? 'Como fazemos' : 'How we do it'}</a>
-      {' · '}
-      <a href="/data/elections/legislative-nowcast/nowcast.json" className="text-ink underline underline-offset-2">{pt ? 'Descarregar os dados (JSON)' : 'Download the data (JSON)'}</a>
+      {note ? ` ${note}` : ''}
+      <span className="mt-1 flex flex-wrap gap-x-5">
+        <a href={`${base}/eleicoes/proximas-legislativas/#metodo`} className="text-ink underline underline-offset-2">{pt ? 'Como fazemos' : 'How we do it'}</a>
+        <a href="/data/elections/legislative-nowcast/nowcast.json" className="text-ink underline underline-offset-2">{pt ? 'Descarregar os dados (JSON)' : 'Download the data (JSON)'}</a>
+      </span>
     </p>
   );
 }

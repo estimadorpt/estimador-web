@@ -61,9 +61,9 @@ export default async function NowcastDistrictsPage({ params }: { params: Promise
         <PageHero
           compact
           back={{ href: '/eleicoes/arquivo', label: t('nav.elections'), locale }}
-          eyebrow={pt ? 'Próximas legislativas · círculos' : 'Next parliamentary election · districts'}
+          eyebrow={pt ? 'Próximas legislativas' : 'Next parliamentary election'}
           title={pt ? `Há deputados em disputa em ${count(contested)} dos ${count(districtForecast.length)} círculos do território` : `Seats are in play in ${count(contested)} of the ${count(districtForecast.length)} home districts`}
-          meta={<span>{pt ? `Estimativa de ${shortDate(run.as_of)} · sondagens até ${shortDate(run.last_poll)}` : `Estimate of ${shortDate(run.as_of)} · polls up to ${shortDate(run.last_poll)}`}</span>}
+          meta={<span>{pt ? `Estimativa de ${shortDate(run.as_of)}, com sondagens até ${shortDate(run.last_poll)}` : `Estimate of ${shortDate(run.as_of)}, with polls up to ${shortDate(run.last_poll)}`}</span>}
         />
         <div className="mx-auto max-w-7xl px-4 py-6">
           <DistrictSummary

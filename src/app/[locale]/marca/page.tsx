@@ -726,6 +726,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
                 ['Publicamos os ficheiros', 'O produtor empacota o bundle', 'Quem publica é o estimador.pt: "nós". Sem jargão de produção.'],
                 ['Liga Portugal', 'Desporto, campeonato português', 'Um só nome para a secção, nas duas línguas.'],
                 ['Dados para compreender Portugal.', 'Dados incríveis para compreender Portugal!', 'Sem adjetivos de venda, pontos de exclamação nem emoji.'],
+                ['Estimativa de 24 nov. 2026, com sondagens até 23 nov.', 'Estimativa de 24 nov. 2026 · sondagens até 23 nov.', 'Sem pontos a meio (·) entre palavras: uma frase, uma vírgula ou outra linha.'],
               ] : [
                 ['Porto win the league in half of the simulated seasons', 'Who will win the league?', 'A headline states the result; questions are for when the reader is asked something.'],
                 ['82 points, 72–91 (90%)', 'Around 80 points, with some uncertainty', 'Uncertainty is drawn and printed, not declared.'],
@@ -734,6 +735,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
                 ['We publish the files', 'The producer packages the bundle', 'The publisher is estimador.pt: "we". No production jargon.'],
                 ['Liga Portugal', 'The Liga, Portuguese league', 'One name for the section; "the Liga" reads as Spain’s.'],
                 ['Data to understand Portugal.', 'Amazing data to understand Portugal!', 'No sales adjectives, exclamation marks or emoji.'],
+                ['Estimate of 24 Nov 2026, with polls up to 23 Nov', 'Estimate of 24 Nov 2026 · polls up to 23 Nov', 'No middle dots (·) between words: a sentence, a comma or another line.'],
               ]} />
             </Part>
             <Part title={pt ? 'Mais regras' : 'More rules'}>

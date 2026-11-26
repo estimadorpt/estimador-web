@@ -43,7 +43,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
   const loc = pt ? 'pt' : 'en';
   const nowcast = await loadLegislativeNowcast();
   const back = { href: '/eleicoes/arquivo', label: t('nav.elections'), locale };
-  const eyebrow = pt ? 'Próximas legislativas · sem data marcada' : 'Next parliamentary election · no date set';
+  const eyebrow = pt ? 'Próximas legislativas' : 'Next parliamentary election';
 
   if (!nowcast.available) {
     return (
@@ -116,7 +116,7 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
           eyebrow={eyebrow}
           title={title}
           lede={lede}
-          meta={<span>{pt ? `Estimativa de ${shortDate(run.as_of)} · sondagens até ${shortDate(run.last_poll)}` : `Estimate of ${shortDate(run.as_of)} · polls up to ${shortDate(run.last_poll)}`}</span>}
+          meta={<span>{pt ? `Estimativa de ${shortDate(run.as_of)}, com sondagens até ${shortDate(run.last_poll)}` : `Estimate of ${shortDate(run.as_of)}, with polls up to ${shortDate(run.last_poll)}`}</span>}
         />
 
         <div className="mx-auto max-w-7xl space-y-10 px-4 py-6">
@@ -137,9 +137,9 @@ export default async function LegislativeNowcastPage({ params }: { params: Promi
                   <li key={`${poll.pollster}-${poll.fieldwork_end}`} className="border-b border-grid py-2.5">
                     <p className="text-[14.5px] text-ink">
                       <span className="font-semibold">{pollsterDisplayName(poll.pollster)}{outlet ? (pt ? ` para ${outlet.pt}` : ` for ${outlet.en}`) : ''}</span>
-                      <span className="text-graphite"> · {fieldwork(poll.fieldwork_start, poll.fieldwork_end)}{poll.sample_size ? (pt ? `, ${count(poll.sample_size)} entrevistas` : `, ${count(poll.sample_size)} interviews`) : ''}</span>
+                      <span className="text-graphite">, {fieldwork(poll.fieldwork_start, poll.fieldwork_end)}{poll.sample_size ? (pt ? `, ${count(poll.sample_size)} entrevistas` : `, ${count(poll.sample_size)} interviews`) : ''}</span>
                     </p>
-                    <p className="mt-0.5 text-[14.5px] tabular-nums text-ink">{top.map(p => `${partyName(p)} ${pct(poll.shares[p])}`).join(' · ')}</p>
+                    <p className="mt-0.5 text-[14.5px] tabular-nums text-ink">{top.map(p => `${partyName(p)} ${pct(poll.shares[p])}`).join(', ')}</p>
                   </li>
                 );
               })}
